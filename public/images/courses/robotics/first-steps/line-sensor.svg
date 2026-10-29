@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" role="img" aria-labelledby="title desc">
+  <title id="title">循跡機器人感測器示意圖</title>
+  <desc id="desc">一台小車底部的左右紅外線感測器對準彎曲的黑色路線。</desc>
+  <rect width="900" height="500" rx="28" fill="#edf4ed" />
+  <path d="M0 374 C180 374 205 194 400 194 S615 374 900 374" fill="none" stroke="#26332b" stroke-linecap="round" stroke-width="74" />
+  <g transform="translate(330 80)">
+    <rect x="0" y="0" width="250" height="210" rx="38" fill="#fff" stroke="#9bb6a2" stroke-width="8" />
+    <rect x="34" y="35" width="182" height="95" rx="24" fill="#dcecdf" />
+    <circle cx="82" cy="82" r="21" fill="#1b5a41" />
+    <circle cx="168" cy="82" r="21" fill="#1b5a41" />
+    <text x="125" y="175" text-anchor="middle" fill="#183a2b" font-family="system-ui, sans-serif" font-size="23" font-weight="700">循跡機器人</text>
+    <path d="M72 207v52M178 207v52" stroke="#d28b00" stroke-linecap="round" stroke-width="9" stroke-dasharray="12 12" />
+    <circle cx="72" cy="267" r="18" fill="#d28b00" />
+    <circle cx="178" cy="267" r="18" fill="#d28b00" />
+  </g>
+  <text x="272" y="465" fill="#fff" font-family="system-ui, sans-serif" font-size="25" font-weight="700">黑色路線</text>
+</svg>

@@ -1,0 +1,16 @@
+---
+import type { CourseTreeNode } from '../lib/course-tree';
+import { siteUrl } from '../lib/site-url';
+interface Props {
+  courseId: string;
+  courseTitle: string;
+  chapters: CourseTreeNode[];
+  currentLabel?: string;
+}
+const { courseId, courseTitle, chapters, currentLabel } = Astro.props;
+---
+<nav class="chapter-breadcrumbs" aria-label="所在位置">
+  <a href={siteUrl(`/courses/${courseId}/`)}>{courseTitle}</a>
+  {chapters.map(chapter => <><span aria-hidden="true">/</span><a href={chapter.href}>{chapter.label}</a></>)}
+  {currentLabel && <><span aria-hidden="true">/</span><span aria-current="page">{currentLabel}</span></>}
+</nav>

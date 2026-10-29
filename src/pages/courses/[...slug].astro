@@ -1,0 +1,152 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import CourseSidebar from '../../components/CourseSidebar.astro';
+import GamePreview from '../../components/GamePreview.astro';
+import ChapterCards from '../../components/ChapterCards.astro';
+import LessonCards from '../../components/LessonCards.astro';
+import ContentTypeBadge from '../../components/ContentTypeBadge.astro';
+import CourseBreadcrumbs from '../../components/CourseBreadcrumbs.astro';
+import LessonNavigation from '../../components/LessonNavigation.astro';
+import { buildCourseTree, chapterNodes, orderedLessonNodes, sortedTreeNodes, type CourseTreeNode } from '../../lib/course-tree';
+import { extractGameBlocks } from '../../lib/game-blocks';
+import { courseFolderId, visibleCourses, visibleLessons } from '../../lib/visibility';
+
+interface Props {
+  course?: CollectionEntry<'lessons'>;
+  chapter?: CourseTreeNode;
+  courseTitle?: string;
+  ancestors?: CourseTreeNode[];
+  previousLesson?: CourseTreeNode | null;
+  nextLesson?: CourseTreeNode | null;
+}
+
+export async function getStaticPaths() {
+  const [lessons, courseSettings, chapterSettings] = await Promise.all([
+    getCollection('lessons'),
+    getCollection('courseSettings'),
+    getCollection('chapterSettings'),
+  ]);
+  const lessonsById = new Map(visibleLessons(lessons, courseSettings, chapterSettings).map(lesson => [lesson.id, lesson]));
+  return visibleCourses(courseSettings).flatMap(setting => {
+    const currentCourseId = courseFolderId(setting.id);
+    const tree = buildCourseTree(lessons, currentCourseId, courseSettings, chapterSettings);
+    const folders = chapterNodes(tree);
+    const ancestorsOf = (id: string) => folders.filter(folder => id.startsWith(`${folder.key}/`)).sort((a, b) => a.key.length - b.key.length);
+    const chapterPaths = folders.map(chapter => ({
+      params: { slug: chapter.key },
+      props: {
+        chapter,
+        courseTitle: setting.data.title,
+        ancestors: ancestorsOf(chapter.key),
+      },
+    }));
+    const sequence = orderedLessonNodes(tree);
+    const lessonPaths = sequence.map((node, index) => ({
+      params: { slug: node.key },
+      props: {
+        course: lessonsById.get(node.key)!,
+        courseTitle: setting.data.title,
+        ancestors: ancestorsOf(node.key),
+        previousLesson: sequence[index - 1] ?? null,
+        nextLesson: sequence[index + 1] ?? null,
+      },
+    }));
+    return [...chapterPaths, ...lessonPaths];
+  });
+}
+
+const { course, chapter, courseTitle, ancestors = [], previousLesson = null, nextLesson = null } = Astro.props;
+const currentPageId = chapter?.key ?? course!.id;
+const currentCourseId = currentPageId.split('/')[0];
+const pageTitle = chapter?.label ?? course!.data.title;
+const Content = course ? (await render(course)).Content : null;
+const gameBlocks = course?.data.type === 'game' ? extractGameBlocks(course.body) : null;
+const children = sortedTreeNodes(chapter?.children ?? []);
+const childChapters = children.filter(node => !node.type);
+const childLessons = children.filter(node => node.type);
+---
+
+<SiteLayout title={pageTitle} description={course?.data.summary}>
+  <div class="page-grid">
+    <CourseSidebar currentCourseId={currentCourseId} currentPageId={currentPageId} />
+    <div class="course-column">
+      {chapter ? (
+        <section class="article">
+          <CourseBreadcrumbs courseId={currentCourseId} courseTitle={courseTitle ?? currentCourseId} chapters={ancestors} currentLabel={chapter.label} />
+          <p class="eyebrow">章節</p>
+          <h1>{chapter.label}</h1>
+          {childChapters.length > 0 && <><h2>小節</h2><ChapterCards chapters={childChapters} /></>}
+          {childLessons.length > 0 && <><h2>章節內容</h2><LessonCards lessons={childLessons} /></>}
+          {children.length === 0 && <p>這個章節目前還沒有內容。</p>}
+        </section>
+      ) : course && Content && (
+      <>
+      {course.data.type === 'game' && <div class="game-breadcrumbs"><CourseBreadcrumbs courseId={currentCourseId} courseTitle={courseTitle ?? currentCourseId} chapters={ancestors} /></div>}
+      <article class:list={['article', { 'game-article': course.data.type === 'game' }]}>
+        {course.data.type === 'game' && gameBlocks ? <GamePreview blocks={gameBlocks} /> : (
+          <>
+            <CourseBreadcrumbs courseId={currentCourseId} courseTitle={courseTitle ?? currentCourseId} chapters={ancestors} />
+            <ContentTypeBadge type={course.data.type} />
+            <h1>{course.data.title}</h1>
+            {course.data.summary && <p class="summary">{course.data.summary}</p>}
+            {course.data.type === 'exercise' ? <div class="exercise-content"><Content /></div> : <Content />}
+          </>
+        )}
+      </article>
+      <LessonNavigation courseId={currentCourseId} courseTitle={courseTitle ?? currentCourseId} previous={previousLesson} next={nextLesson} />
+      </>
+      )}
+    </div>
+  </div>
+</SiteLayout>
+
+<script>
+  import '../../scripts/code-blocks';
+  document.querySelectorAll<HTMLElement>('.exercise-content').forEach((content) => {
+    const headings = [...content.querySelectorAll<HTMLHeadingElement>('h3')];
+    for (const inputHeading of headings) {
+      const match = inputHeading.textContent?.trim().match(/^範例輸入\s*(\d+)$/);
+      if (!match) continue;
+      const inputPre = inputHeading.nextElementSibling;
+      const outputHeading = inputPre?.nextElementSibling;
+      const outputMatch = outputHeading?.textContent?.trim().match(/^範例輸出\s*(\d+)$/);
+      const outputPre = outputHeading?.nextElementSibling;
+      if (!(inputPre instanceof HTMLPreElement) || !(outputHeading instanceof HTMLHeadingElement) || outputMatch?.[1] !== match[1] || !(outputPre instanceof HTMLPreElement)) continue;
+
+      const pair = document.createElement('section');
+      const inputColumn = document.createElement('div');
+      const outputColumn = document.createElement('div');
+      pair.className = 'sample-case';
+      pair.setAttribute('aria-label', `範例測資 ${match[1]}`);
+      inputColumn.className = 'sample-column';
+      outputColumn.className = 'sample-column';
+      inputHeading.before(pair);
+      inputColumn.append(inputHeading, inputPre);
+      outputColumn.append(outputHeading, outputPre);
+      pair.append(inputColumn, outputColumn);
+    }
+  });
+
+</script>
+
+<style is:global>
+  .article table { width: 100%; border-collapse: collapse; }
+  .article th, .article td { padding: .55rem .7rem; border: 1px solid #111; text-align: left; }
+  .article pre { position: relative; padding-top: 3rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .article pre code { display: block; counter-reset: code-line; font-size: 0; line-height: 0; }
+  .article pre code > .line { position: relative; display: block; min-height: 1.55em; padding-left: 3.4em; font-size: .95rem; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .article pre code > .line::before { position: absolute; left: 0; width: 2.55em; color: #9eabb7; content: counter(code-line); counter-increment: code-line; text-align: right; }
+  .article pre[data-language="text"] code > .line { padding-left: 0; }
+  .article pre[data-language="text"] code > .line::before { display: none; counter-increment: none; }
+  .sample-case { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 1rem 0 1.5rem; padding: 1rem; border: 1px solid #b6c3ba; border-radius: .7rem; background: #fafcf9; }
+  .sample-column { min-width: 0; }
+  .sample-column h3 { margin: 0 0 .5rem; font-size: 1rem; }
+  .sample-column pre { margin: 0; }
+  .copy-code-button { position: absolute; z-index: 1; top: .55rem; right: .6rem; min-height: 1.8rem; padding: .25rem .65rem; color: #173d2d; background: #f4f7f3; border: 1px solid #a8bbad; border-radius: .4rem; font-size: .82rem; font-weight: 700; line-height: 1.3; cursor: pointer; user-select: none; }
+  .copy-code-button:hover { background: #e3eee4; }
+  .game-article { overflow: hidden; padding: 0; }
+  .game-breadcrumbs { padding: .25rem .35rem 0; }
+  .game-preview { display: block; width: 100%; height: 1px; min-height: 0; border: 0; border-radius: 1rem; background: #fff; }
+  @media (max-width: 520px) { .sample-case { grid-template-columns: 1fr; } }
+</style>

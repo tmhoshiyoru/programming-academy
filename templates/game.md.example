@@ -1,0 +1,26 @@
+---
+title: 互動小遊戲範本
+type: game
+summary: 以三段程式碼組成可互動的小遊戲
+order: 1
+hidden: false
+draft: false
+---
+
+## 遊戲說明
+
+在這裡說明遊戲目標、操作方式和結束條件。下方三個程式碼區塊會組合成隔離的互動預覽；訪客只能遊玩，不能編輯程式碼。
+
+建議先在 HTML 區塊建立介面元素，再用 CSS 排版與美化，最後用 JavaScript 加上互動。
+
+```game-html
+<!-- 在這裡撰寫遊戲 HTML -->
+```
+
+```game-css
+/* 在這裡撰寫遊戲 CSS */
+```
+
+```game-js
+// 在這裡撰寫遊戲 JavaScript
+```

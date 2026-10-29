@@ -1,0 +1,162 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+---
+
+<SiteLayout title="網頁模擬器" description="在本機頁面中編輯 HTML、CSS 和 JavaScript，並預覽結果。">
+  <section class="article simulator-shell">
+    <p class="eyebrow">獨立工具</p>
+    <h1>網頁模擬器</h1>
+    <p class="summary">編輯網頁程式碼，再切換到預覽頁籤查看結果。預設使用完整 HTML；需要分開編輯時，按「進階」。</p>
+
+    <div class="simulator-tabs" role="tablist" aria-label="網頁模擬器頁籤">
+      <button id="source-tab" class="simulator-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="source-panel">程式碼</button>
+      <button id="preview-tab" class="simulator-tab" type="button" role="tab" aria-selected="false" aria-controls="preview-panel">預覽結果</button>
+    </div>
+
+    <section id="source-panel" class="simulator-panel" role="tabpanel" aria-labelledby="source-tab">
+      <div class="simulator-toolbar">
+        <div>
+          <h2 id="editor-title">完整 HTML</h2>
+          <p id="editor-help">直接貼上包含 CSS 和 JavaScript 的完整網頁。</p>
+        </div>
+        <button id="advanced-toggle" class="secondary-button" type="button" aria-pressed="false">進階</button>
+      </div>
+
+      <div id="full-editor" class="code-editor">
+        <label for="full-html">HTML（包含 CSS 和 JavaScript）</label>
+        <textarea id="full-html" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="完整 HTML 程式碼"></textarea>
+      </div>
+
+      <div id="split-editor" class="split-editors" hidden>
+        <label class="code-editor">HTML<textarea id="split-html" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="HTML 程式碼"></textarea></label>
+        <label class="code-editor">CSS<textarea id="split-css" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="CSS 程式碼"></textarea></label>
+        <label class="code-editor">JavaScript<textarea id="split-js" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="JavaScript 程式碼"></textarea></label>
+      </div>
+
+      <div class="simulator-actions">
+        <p>網頁會在隔離的預覽框架中執行。</p>
+        <button id="show-preview" class="primary-button" type="button">預覽網頁</button>
+      </div>
+    </section>
+
+    <section id="preview-panel" class="simulator-panel" role="tabpanel" aria-labelledby="preview-tab" hidden>
+      <div class="simulator-toolbar preview-toolbar">
+        <div>
+          <h2>預覽結果</h2>
+          <p>這是你的 HTML、CSS 和 JavaScript 執行後的畫面。</p>
+        </div>
+        <button id="refresh-preview" class="secondary-button" type="button">重新整理預覽</button>
+      </div>
+      <iframe id="simulator-frame" class="simulator-frame" title="網頁程式碼預覽" sandbox="allow-scripts"></iframe>
+    </section>
+  </section>
+</SiteLayout>
+
+<script>
+  import { loadSandboxedPreview } from '../lib/sandboxed-preview';
+
+  const sourceTab = document.querySelector<HTMLButtonElement>('#source-tab');
+  const previewTab = document.querySelector<HTMLButtonElement>('#preview-tab');
+  const sourcePanel = document.querySelector<HTMLElement>('#source-panel');
+  const previewPanel = document.querySelector<HTMLElement>('#preview-panel');
+  const advancedToggle = document.querySelector<HTMLButtonElement>('#advanced-toggle');
+  const fullEditor = document.querySelector<HTMLElement>('#full-editor');
+  const splitEditor = document.querySelector<HTMLElement>('#split-editor');
+  const fullHtml = document.querySelector<HTMLTextAreaElement>('#full-html');
+  const splitHtml = document.querySelector<HTMLTextAreaElement>('#split-html');
+  const splitCss = document.querySelector<HTMLTextAreaElement>('#split-css');
+  const splitJs = document.querySelector<HTMLTextAreaElement>('#split-js');
+  const editorTitle = document.querySelector<HTMLElement>('#editor-title');
+  const editorHelp = document.querySelector<HTMLElement>('#editor-help');
+  const frame = document.querySelector<HTMLIFrameElement>('#simulator-frame');
+  const showPreview = document.querySelector<HTMLButtonElement>('#show-preview');
+  const refreshPreview = document.querySelector<HTMLButtonElement>('#refresh-preview');
+  let advanced = false;
+
+  const cspMeta = '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data: blob:; media-src data: blob:; font-src data:; style-src \'unsafe-inline\'; script-src \'unsafe-inline\'; connect-src \'none\'; frame-src \'none\'; object-src \'none\'; form-action \'none\'; base-uri \'none\'">';
+  const scriptCloseTag = '<' + '/script>';
+  const exampleHtml = '<main class="card"><p class="eyebrow">互動範例</p><h1>點亮一顆星星</h1><p>這個小範例示範 HTML、CSS 和 JavaScript 如何一起運作。</p><button id="star-button" type="button">點我試試</button><p id="star-message" aria-live="polite">星星還在休息。</p></main>';
+  const exampleCss = 'body { min-height: 100vh; display: grid; place-items: center; margin: 0; padding: 24px; background: #eaf3eb; color: #183a2b; font: 16px/1.6 system-ui, sans-serif; }\n.card { max-width: 560px; padding: 32px; border-radius: 20px; background: white; box-shadow: 0 12px 35px #183a2b1c; }\nh1 { margin: 0 0 12px; }\nbutton { padding: 10px 16px; border: 0; border-radius: 10px; color: white; background: #1b5a41; font: inherit; cursor: pointer; }\nbutton:hover { background: #12442f; }\n.eyebrow { color: #52745f; font-weight: 700; }';
+  const exampleJs = "const button = document.querySelector('#star-button');\nconst message = document.querySelector('#star-message');\nbutton?.addEventListener('click', () => {\n  message.textContent = '✨ 星星亮起來了！';\n});";
+
+  // 範例只在每次載入頁面時填入記憶體中的欄位，不使用 localStorage/sessionStorage。
+  if (fullHtml && !fullHtml.value) fullHtml.value = `<!doctype html>\n<html lang="zh-Hant">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <style>${exampleCss}</style>\n</head>\n<body>${exampleHtml}\n<script>${exampleJs}${scriptCloseTag}\n</body>\n</html>`;
+  if (splitHtml && !splitHtml.value) splitHtml.value = exampleHtml;
+  if (splitCss && !splitCss.value) splitCss.value = exampleCss;
+  if (splitJs && !splitJs.value) splitJs.value = exampleJs;
+
+  function addCspToDocument(source: string) {
+    const html = source.trim();
+    if (!html) return blankPreview;
+    if (/<head\b[^>]*>/i.test(html)) return html.replace(/<head\b[^>]*>/i, (head) => `${head}${cspMeta}`);
+    if (/<html\b[^>]*>/i.test(html)) return html.replace(/<html\b[^>]*>/i, (openingHtml) => `${openingHtml}<head>${cspMeta}</head>`);
+    return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">${cspMeta}</head><body>${html}</body></html>`;
+  }
+
+  function buildSplitDocument() {
+    const scriptOpen = '<' + 'script>';
+    return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${cspMeta}<style>${splitCss?.value ?? ''}</style></head><body>${splitHtml?.value ?? ''}${scriptOpen}${splitJs?.value ?? ''}${scriptCloseTag}</body></html>`;
+  }
+
+  function updatePreview() {
+    if (!frame) return;
+    const documentSource = advanced ? buildSplitDocument() : addCspToDocument(fullHtml?.value ?? '');
+    loadSandboxedPreview(frame, documentSource, import.meta.env.BASE_URL);
+  }
+
+  function selectTab(tab: 'source' | 'preview') {
+    const showSource = tab === 'source';
+    if (sourceTab) sourceTab.setAttribute('aria-selected', String(showSource));
+    if (previewTab) previewTab.setAttribute('aria-selected', String(!showSource));
+    sourceTab?.classList.toggle('is-active', showSource);
+    previewTab?.classList.toggle('is-active', !showSource);
+    if (sourcePanel) sourcePanel.hidden = !showSource;
+    if (previewPanel) previewPanel.hidden = showSource;
+    if (!showSource) updatePreview();
+  }
+
+  advancedToggle?.addEventListener('click', () => {
+    advanced = !advanced;
+    if (fullEditor) fullEditor.hidden = advanced;
+    if (splitEditor) splitEditor.hidden = !advanced;
+    advancedToggle.setAttribute('aria-pressed', String(advanced));
+    advancedToggle.textContent = advanced ? '完整 HTML' : '進階';
+    if (editorTitle) editorTitle.textContent = advanced ? '分開編輯' : '完整 HTML';
+    if (editorHelp) editorHelp.textContent = advanced ? '此模式分別使用 HTML、CSS 和 JavaScript，與完整 HTML 模式擇一預覽。' : '直接貼上包含 CSS 和 JavaScript 的完整網頁。';
+  });
+
+  sourceTab?.addEventListener('click', () => selectTab('source'));
+  previewTab?.addEventListener('click', () => selectTab('preview'));
+  showPreview?.addEventListener('click', () => selectTab('preview'));
+  refreshPreview?.addEventListener('click', updatePreview);
+  updatePreview();
+</script>
+
+<style>
+  .simulator-shell { padding-bottom: 2rem; }
+  .simulator-tabs { display: flex; gap: .4rem; margin: 1.5rem -0.4rem 0; padding: 0 .4rem; border-bottom: 1px solid #b9c9bd; }
+  .simulator-tab { margin-bottom: -1px; padding: .65rem 1rem; color: #3a5044; background: transparent; border: 1px solid transparent; border-radius: .6rem .6rem 0 0; font: inherit; font-weight: 700; cursor: pointer; }
+  .simulator-tab:hover { background: #edf3ed; }
+  .simulator-tab.is-active { color: #123f2d; background: #fff; border-color: #b9c9bd; border-bottom-color: #fff; }
+  .simulator-panel { padding-top: 1.25rem; }
+  .simulator-panel[hidden], .code-editor[hidden], .split-editors[hidden] { display: none !important; }
+  .simulator-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .simulator-toolbar h2 { margin: 0; }
+  .simulator-toolbar p { margin: .2rem 0 0; color: #3a5044; }
+  .secondary-button, .primary-button { min-height: 2.7rem; padding: .5rem .9rem; border: 1px solid #8ca695; border-radius: .6rem; font: inherit; font-weight: 750; cursor: pointer; }
+  .secondary-button { color: #173d2d; background: #f4f7f3; }
+  .secondary-button:hover { background: #e5eee5; }
+  .primary-button { color: #fff; background: #1b5a41; border-color: #1b5a41; }
+  .primary-button:hover { background: #12442f; }
+  .code-editor { display: flex; flex-direction: column; gap: .5rem; color: #183a2b; font-weight: 750; }
+  .code-editor textarea { width: 100%; min-height: 430px; resize: vertical; padding: 1rem; border: 1px solid #879b8c; border-radius: .65rem; color: #f2faf4; background: #1d3026; font: .92rem/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; tab-size: 2; }
+  .code-editor textarea::placeholder { color: #b6c7ba; opacity: 1; }
+  .split-editors { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  .split-editors[hidden] { display: none; }
+  .split-editors textarea { min-height: 210px; }
+  .simulator-actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1rem; }
+  .simulator-actions p { margin: 0; color: #3a5044; font-size: .95rem; }
+  .simulator-frame { display: block; width: 100%; min-height: min(68vh, 720px); border: 1px solid #879b8c; border-radius: .7rem; background: #fff; }
+  @media (min-width: 1000px) { .split-editors { grid-template-columns: repeat(3, minmax(0, 1fr)); } .split-editors textarea { min-height: 450px; } }
+  @media (max-width: 600px) { .simulator-toolbar, .simulator-actions { align-items: stretch; flex-direction: column; } .simulator-actions .primary-button { width: 100%; } .code-editor textarea { min-height: 320px; } }
+</style>

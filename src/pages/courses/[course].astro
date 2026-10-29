@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import CourseSidebar from '../../components/CourseSidebar.astro';
+import ChapterCards from '../../components/ChapterCards.astro';
+import { buildCourseTree, sortedTreeNodes } from '../../lib/course-tree';
+import { courseFolderId, visibleCourses } from '../../lib/visibility';
+
+export async function getStaticPaths() {
+  const settings = await getCollection('courseSettings');
+  return visibleCourses(settings).map((setting) => ({
+    params: { course: courseFolderId(setting.id) },
+    props: { setting },
+  }));
+}
+
+const { setting } = Astro.props;
+const [courseSettings, chapterSettings, allLessons] = await Promise.all([
+  getCollection('courseSettings'),
+  getCollection('chapterSettings'),
+  getCollection('lessons'),
+]);
+const currentCourseId = courseFolderId(setting.id);
+const chapters = sortedTreeNodes(buildCourseTree(allLessons, currentCourseId, courseSettings, chapterSettings).filter(node => !node.type));
+---
+
+<SiteLayout title={setting.data.title} description={setting.data.summary}>
+  <div class="page-grid">
+    <CourseSidebar currentCourseId={currentCourseId} />
+    <div class="course-column">
+      <section class="article">
+        <p class="eyebrow">課程</p>
+        <h1>{setting.data.title}</h1>
+        {setting.data.summary && <p class="summary">{setting.data.summary}</p>}
+        {chapters.length ? (
+          <>
+            <h2>課程章節</h2>
+            <ChapterCards chapters={chapters} />
+          </>
+        ) : <p>這門課程目前還沒有章節內容。</p>}
+      </section>
+    </div>
+  </div>
+</SiteLayout>

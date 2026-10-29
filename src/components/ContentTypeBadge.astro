@@ -1,0 +1,9 @@
+---
+import { contentTypes, contentTypeIcon, type ContentType } from '../lib/content-types';
+interface Props { type: ContentType; }
+const { type } = Astro.props;
+---
+<span class:list={['content-type', `content-kind-${type}`]}>
+  <Fragment set:html={contentTypeIcon(type)} />
+  <span>{contentTypes[type].label}</span>
+</span>

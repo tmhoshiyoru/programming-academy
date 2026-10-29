@@ -1,0 +1,54 @@
+<section class="word-wall" data-brick-word-wall aria-label="小綠綠程式學苑">
+  <canvas class="word-wall-canvas" aria-label="小綠綠程式學苑"></canvas>
+  <button class="word-wall-trigger" type="button" aria-label="小綠綠程式學苑" aria-expanded="false"></button>
+  <div class="game-status" hidden>
+    <div class="lives" role="img" aria-label="剩餘 3 條生命"><span></span><span></span><span></span></div>
+    <span class="game-score" aria-label="得分">0</span>
+  </div>
+  <p class="game-announcement" role="status" aria-live="polite"></p>
+  <div class="game-result" hidden>
+    <div class="result-card">
+      <p class="result-title">Game over</p>
+      <p class="result-score"></p>
+      <div class="result-actions">
+        <button type="button" class="play-again">再玩一次</button>
+        <button type="button" class="close-game">收起</button>
+      </div>
+    </div>
+  </div>
+  <div class="game-help" hidden>
+    <span>滑鼠・觸控・← →</span>
+    <div class="powerup-legend" aria-label="可掉落的道具">
+      <span class="power-wide">↔ 加長</span><span class="power-slow">◷ 慢速</span><span class="power-multi">● 三球</span><span class="power-life">＋ 補血</span>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../scripts/brick-word-wall';
+</script>
+
+<style>
+  .word-wall { position: relative; overflow: hidden; border: 1px solid #8caa94; border-radius: .85rem; background: #b6c7ba; }
+  .word-wall-canvas { display: block; width: 100%; height: clamp(180px, 22vw, 280px); transition: height .4s ease; }
+  .word-wall.is-playing .word-wall-canvas { height: clamp(460px, 54vw, 620px); touch-action: none; }
+  .word-wall-trigger { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: default; }
+  .game-status { position: absolute; top: 1rem; left: 1.2rem; right: 1.2rem; display: flex; align-items: center; justify-content: space-between; color: #173923; font-size: .9rem; font-weight: 750; pointer-events: none; }
+  .lives { display: flex; gap: .4rem; }
+  .lives span { width: 1.35rem; height: .38rem; border-radius: 2px; background: #b93538; box-shadow: 0 0 0 1px #b9353820; transition: opacity .2s; }
+  .lives span.lost { opacity: .16; }
+  .game-announcement { position: absolute; top: 2.6rem; left: 50%; margin: 0; padding: .25rem .7rem; color: #fff; background: #183e2fe8; border-radius: 99px; font-size: .78rem; font-weight: 700; white-space: nowrap; transform: translateX(-50%); pointer-events: none; }
+  .game-announcement:empty { display: none; }
+  .game-result { position: absolute; inset: 0 0 2.8rem; display: grid; place-items: center; background: #20372d44; backdrop-filter: blur(2px); }
+  .result-card { min-width: 230px; padding: 1.5rem 2rem; color: #1b3828; background: #f6faf5; border: 1px solid #88a08d; border-radius: .9rem; text-align: center; box-shadow: 0 12px 35px #143b252a; }
+  .result-title { margin: 0; font-size: 1.65rem; font-weight: 800; }
+  .result-score { margin: .25rem 0 1rem; font-size: .9rem; }
+  .result-actions { display: flex; gap: .6rem; justify-content: center; }
+  .result-actions button { padding: .45rem .8rem; color: #fff; background: #17583d; border: 1px solid #17583d; border-radius: .4rem; font-size: .9rem; cursor: pointer; }
+  .result-actions .close-game { color: #24543a; background: transparent; }
+  .game-help { display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap; min-height: 2.8rem; padding: .6rem 1rem; color: #334c3b; border-top: 1px solid #77948155; font-size: .72rem; }
+  .powerup-legend { display: flex; flex-wrap: wrap; gap: .65rem; font-weight: 750; }
+  .power-wide { color: #155331; } .power-slow { color: #0b527a; } .power-multi { color: #653585; } .power-life { color: #882c36; }
+  [hidden] { display: none !important; }
+  @media (max-width: 600px) { .game-help { justify-content: center; gap: .35rem 1rem; } .game-status { left: .8rem; right: .8rem; } .powerup-legend { gap: .5rem; } }
+</style>

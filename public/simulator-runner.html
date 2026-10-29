@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; font-src data:; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'" />
+    <title>網頁預覽</title>
+  </head>
+  <body>
+    <script>
+      (() => {
+      function observePreviewHeight(requestId) {
+        // Auto-sized previews use the intrinsic document height, rather than a body
+        // min-height: 100vh that would feed the iframe's current height back into itself.
+        const sizingStyle = document.createElement('style');
+        sizingStyle.textContent = 'html{height:auto!important;min-height:0!important;overflow-y:hidden!important}body{height:auto!important;min-height:0!important}';
+        document.head.append(sizingStyle);
+        let queued = false;
+        let previousHeight = -1;
+        const reportHeight = () => {
+          queued = false;
+          const body = document.body;
+          if (!body) return;
+          const rect = body.getBoundingClientRect();
+          const style = getComputedStyle(body);
+          const rootStyle = getComputedStyle(document.documentElement);
+          const pixels = value => Number.parseFloat(value) || 0;
+          let bottom = Math.max(rect.bottom, rect.top + body.scrollHeight);
+          // Include overflowing and floating children, as well as collapsed trailing margins.
+          for (const child of body.children) {
+            const childStyle = getComputedStyle(child);
+            if (childStyle.display === 'none' || childStyle.position === 'fixed') continue;
+            const childRect = child.getBoundingClientRect();
+            bottom = Math.max(bottom, childRect.bottom + pixels(childStyle.marginBottom));
+          }
+          const height = Math.max(0, Math.ceil(bottom + window.scrollY + pixels(style.marginBottom) + pixels(rootStyle.paddingBottom) + pixels(rootStyle.borderBottomWidth)));
+          if (height === previousHeight) return;
+          previousHeight = height;
+          window.parent.postMessage({ type: 'preview:height', requestId, height }, '*');
+        };
+        const scheduleHeight = () => {
+          if (!queued) { queued = true; requestAnimationFrame(reportHeight); }
+        };
+        const observer = new ResizeObserver(scheduleHeight);
+        observer.observe(document.documentElement);
+        observer.observe(document.body);
+        const mutations = new MutationObserver(scheduleHeight);
+        mutations.observe(document.documentElement, {
+          subtree: true, childList: true, attributes: true, characterData: true,
+        });
+        window.addEventListener('pagehide', () => { observer.disconnect(); mutations.disconnect(); }, { once: true });
+        window.addEventListener('resize', scheduleHeight);
+        window.addEventListener('load', scheduleHeight);
+        document.addEventListener('load', scheduleHeight, true);
+        document.fonts?.ready.then(scheduleHeight);
+        document.fonts?.addEventListener('loadingdone', scheduleHeight);
+        scheduleHeight();
+      }
+
+      window.addEventListener('message', (event) => {
+        if (event.source !== window.parent || event.data?.type !== 'simulator:render' || typeof event.data.html !== 'string') return;
+        const { html, autoHeight, requestId } = event.data;
+        const heightScript = autoHeight === true && typeof requestId === 'string'
+          ? `(${observePreviewHeight.toString()})(${JSON.stringify(requestId)});`
+          : null;
+        document.open();
+        document.write(html);
+        document.close();
+        if (heightScript) {
+          // Run the observer in the new document, so document.open() cannot clear its hooks.
+          const script = document.createElement('script');
+          script.textContent = heightScript;
+          document.body.append(script);
+        }
+      });
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import BrickWordWall from '../components/BrickWordWall.astro';
+import { getCollection } from 'astro:content';
+import { courseFolderId, visibleCourses } from '../lib/visibility';
+import { siteUrl } from '../lib/site-url';
+
+const courses = visibleCourses(await getCollection('courseSettings'));
+---
+
+<SiteLayout title="首頁">
+  <div class="course-column">
+    <BrickWordWall />
+    <section class="home-courses">
+      <h2>從課程開始</h2>
+      {courses.length ? <ul class="course-cards">{courses.map((course) => <li><a href={siteUrl(`/courses/${courseFolderId(course.id)}/`)}><strong>{course.data.title}</strong><br /><span>開啟課程</span></a></li>)}</ul> : <p>新增課程設定後，課程會自動出現在這裡。</p>}
+    </section>
+    </div>
+</SiteLayout>
+

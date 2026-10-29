@@ -1,0 +1,58 @@
+---
+import { getCollection } from 'astro:content';
+import { buildCourseTree, renderCourseTree } from '../lib/course-tree';
+import { courseFolderId, visibleCourses, visibleLessons } from '../lib/visibility';
+import { siteUrl } from '../lib/site-url';
+
+interface Props { currentCourseId: string; currentPageId?: string; }
+const { currentCourseId, currentPageId } = Astro.props;
+const courseSettings = await getCollection('courseSettings');
+const chapterSettings = await getCollection('chapterSettings');
+const lessons = visibleLessons(await getCollection('lessons'), courseSettings, chapterSettings);
+const currentCourseSetting = courseSettings.find((setting) => courseFolderId(setting.id) === currentCourseId);
+const currentCourseName = currentCourseSetting?.data.title ?? currentCourseId.replace(/^\d+-/, '');
+const courseOptions = visibleCourses(courseSettings).map((setting) => ({
+  id: courseFolderId(setting.id),
+  title: setting.data.title,
+  href: siteUrl(`/courses/${courseFolderId(setting.id)}/`),
+}));
+const treeHtml = renderCourseTree(buildCourseTree(lessons, currentCourseId, courseSettings, chapterSettings), currentPageId ? siteUrl(`/courses/${currentPageId}/`) : undefined);
+---
+
+<aside class="course-nav" id="course-sidebar" aria-label={`${currentCourseName}課程目錄`}>
+  <div class="sidebar-heading">
+    <details class="course-switcher">
+      <summary aria-label={`目前課程：${currentCourseName}，點選切換課程`}>
+        <span>{currentCourseName}</span>
+        <svg class="switch-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg>
+      </summary>
+      <div class="course-switch-menu">
+        <p>切換課程</p>
+        <ul>
+          {courseOptions.map((option) => (
+            <li>
+              <a href={option.href} aria-current={option.id === currentCourseId ? 'page' : undefined}>
+                <span>{option.title}</span>
+                {option.id === currentCourseId && <span class="current-course-mark">目前</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </details>
+    <button class="sidebar-pin" id="sidebar-pin" type="button" aria-controls="course-sidebar" aria-pressed="false" aria-label="固定展開課程目錄" title="固定展開並調整版面">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17v5" /><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" /></svg>
+    </button>
+  </div>
+  <nav class="tree-nav" aria-label={`${currentCourseName}章節與文章`}>
+    {treeHtml ? <Fragment set:html={treeHtml} /> : <p class="sidebar-empty">這門課程目前還沒有章節。</p>}
+  </nav>
+  <div class="sidebar-tools">
+    <a href={siteUrl('/simulator/')}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2" /><path d="M8 22h8M12 18v4M7 9h10M7 13h5" /></svg>
+      <span>網頁模擬器</span>
+      <svg class="tool-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+    </a>
+  </div>
+</aside>
+<button class="sidebar-handle" id="sidebar-handle" type="button" aria-controls="course-sidebar" aria-expanded="false" aria-label="展開課程目錄">›</button>
