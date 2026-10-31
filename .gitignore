@@ -12,3 +12,6 @@ Thumbs.db
 .vscode/
 .codex/
 .agents/
+
+# Local documentation only: exclude README files at every directory level.
+[Rr][Ee][Aa][Dd][Mm][Ee]*

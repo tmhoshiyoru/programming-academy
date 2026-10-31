@@ -1,9 +1,10 @@
 ---
 import { contentTypes, contentTypeIcon, type ContentType } from '../lib/content-types';
-interface Props { type: ContentType; }
-const { type } = Astro.props;
+interface Props { type: ContentType; supplementary?: boolean; }
+const { type, supplementary = false } = Astro.props;
 ---
-<span class:list={['content-type', `content-kind-${type}`]}>
+<span class:list={['content-type', `content-kind-${type}`, { 'is-supplementary': supplementary }]}>
   <Fragment set:html={contentTypeIcon(type)} />
   <span>{contentTypes[type].label}</span>
+  {supplementary && <span class="supplementary-tag">補充教材</span>}
 </span>

@@ -7,8 +7,8 @@ const { lessons } = Astro.props;
 <ul class="course-cards lesson-cards">
   {lessons.map(lesson => (
     <li>
-      <a href={lesson.href} class:list={['lesson-card', `content-kind-${lesson.type}`]}>
-        <ContentTypeBadge type={lesson.type!} />
+      <a href={lesson.href} class:list={['lesson-card', `content-kind-${lesson.type}`, { 'is-supplementary': lesson.supplementary }]}>
+        <ContentTypeBadge type={lesson.type!} supplementary={lesson.supplementary} />
         <strong class="lesson-card-title">{lesson.label}</strong>
         {lesson.summary && <span class="lesson-card-summary">{lesson.summary}</span>}
       </a>

@@ -1,6 +1,7 @@
 ---
 title: 知識點範本
 type: knowledge
+supplementary: false
 summary: 使用 Markdown 撰寫圖文並茂的知識文章
 order: 1
 hidden: false

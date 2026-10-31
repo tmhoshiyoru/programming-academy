@@ -11,6 +11,10 @@ export const contentTypes = {
     label: '互動小遊戲',
     paths: ['M6 8h12a3 3 0 0 1 3 2.6l1 7a2 2 0 0 1-3.4 1.7L16 17H8l-2.6 2.3A2 2 0 0 1 2 17.6l1-7A3 3 0 0 1 6 8Z', 'M7 11v5M4.5 13.5h5M16 12h.01M19 15h.01'],
   },
+  interactive: {
+    label: '互動教材',
+    paths: ['M12 7v14', 'M3 3h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5v10', 'M3 3v16h5a4 4 0 0 1 4 2', 'm16 14 6 3-3 1-1 3-2-7Z'],
+  },
 } as const;
 
 export type ContentType = keyof typeof contentTypes;

@@ -1,0 +1,36 @@
+---
+title: 互動教材標題
+type: interactive
+supplementary: false
+order: 1
+hidden: false
+draft: false
+---
+
+## 第一段說明
+
+在這裡撰寫 Markdown，可使用圖片、表格、公式及程式碼。
+
+:::interactive 第一個互動區塊的名稱
+
+```game-html
+<button id="action" type="button">點我試試</button>
+<p id="result" aria-live="polite">還沒按下按鈕。</p>
+```
+
+```game-css
+body { margin: 0; padding: 20px; color: #193b2a; background: #f3faf5; font: 18px/1.7 system-ui, sans-serif; }
+button { padding: 10px 16px; font: inherit; cursor: pointer; }
+```
+
+```game-js
+document.querySelector('#action').addEventListener('click', () => {
+  document.querySelector('#result').textContent = '互動成功！';
+});
+```
+
+:::
+
+## 第二段說明
+
+繼續撰寫 Markdown。若需要其他互動區塊，可在此處再次放入一整組 `:::interactive` 到 `:::`。

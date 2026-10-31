@@ -2,7 +2,7 @@ import { chapterFolderId, isFolderHidden, type ChapterSetting, type CourseSettin
 import { contentTypeIcon, contentTypes, type ContentType } from './content-types';
 import { siteUrl } from './site-url';
 
-export type CourseTreeNode = { key: string; label: string; href: string; order: number; type?: ContentType; summary?: string; children: CourseTreeNode[] };
+export type CourseTreeNode = { key: string; label: string; href: string; order: number; type?: ContentType; supplementary?: boolean; summary?: string; children: CourseTreeNode[] };
 
 function prefixOrder(value: string) {
   const match = value.match(/^(\d+)-/);
@@ -78,6 +78,7 @@ export function buildCourseTree(
       key: lesson.id,
       label: lesson.data.title,
       type: lesson.data.type,
+      supplementary: lesson.data.supplementary,
       summary: lesson.data.summary,
       href: siteUrl(`/courses/${lesson.id}/`),
       order: lesson.data.order || prefixOrder(parts.at(-1)!),
@@ -111,7 +112,7 @@ export function renderCourseTree(nodes: CourseTreeNode[], currentHref?: string, 
     const label = escapeHtml(node.label);
     if (node.type) {
       const active = node.href === currentHref;
-      return `<li class="tree-page"><a class="tree-lesson content-kind-${node.type}" href="${escapeHtml(node.href)}"${active ? ' aria-current="page"' : ''}><span class="tree-type-icon" title="${contentTypes[node.type].label}">${contentTypeIcon(node.type)}</span><span>${label}</span></a></li>`;
+      return `<li class="tree-page"><a class="tree-lesson content-kind-${node.type}${node.supplementary ? ' is-supplementary' : ''}" href="${escapeHtml(node.href)}"${active ? ' aria-current="page"' : ''}><span class="tree-type-icon" title="${contentTypes[node.type].label}">${contentTypeIcon(node.type)}</span><span>${label}${node.supplementary ? '<small class="tree-supplementary-label">補充教材</small>' : ''}</span></a></li>`;
     }
     const open = depth === 0 || currentHref?.startsWith(node.href) ? ' open' : '';
     const active = currentHref === node.href;

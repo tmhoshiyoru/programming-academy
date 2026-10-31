@@ -16,7 +16,7 @@ const links = [
 <nav class="lesson-pagination" aria-label="課程前後節導覽">
   {links.map(({ lesson, label, direction }) => (
     <a
-      class:list={['lesson-pagination-link', `lesson-pagination-${direction}`]}
+      class:list={['lesson-pagination-link', `lesson-pagination-${direction}`, { 'is-supplementary': lesson?.supplementary }]}
       href={lesson?.href ?? siteUrl(`/courses/${courseId}/`)}
       rel={lesson ? (direction === 'previous' ? 'prev' : 'next') : undefined}
       aria-label={`${lesson ? label : '回到課程'}：${lesson?.label ?? courseTitle}`}
@@ -25,7 +25,7 @@ const links = [
         <path d={lesson ? (direction === 'previous' ? 'M19 12H5m7-7-7 7 7 7' : 'M5 12h14m-7-7 7 7-7 7') : 'm3 10 9-7 9 7M5 9v12h14V9M9 21v-7h6v7'} />
       </svg>
       <span class="pagination-text">
-        <span class="pagination-label">{lesson ? label : '回到課程'}</span>
+        <span class="pagination-label">{lesson ? label : '回到課程'}{lesson?.supplementary && <span> · 補充教材</span>}</span>
         <strong>{lesson?.label ?? courseTitle}</strong>
       </span>
     </a>
@@ -36,6 +36,9 @@ const links = [
   .lesson-pagination { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.25rem; }
   .lesson-pagination-link { display: flex; align-items: center; gap: .85rem; min-width: 0; padding: 1rem 1.15rem; color: #173d2c; background: #fff; border: 1px solid #b8cbbd; border-radius: .8rem; text-decoration: none; box-shadow: 0 4px 14px #203a2c08; transition: border-color .15s, background-color .15s; }
   .lesson-pagination-link:hover { color: #123d28; background: #f5faf3; border-color: #6d9679; }
+  .lesson-pagination-link.is-supplementary { color: #842446; background: #fff0f4; border-color: #d3a0b0; }
+  .lesson-pagination-link.is-supplementary:hover { background: #fce2ea; border-color: #aa5772; }
+  .lesson-pagination-link.is-supplementary .pagination-label { color: #842446; }
   .pagination-arrow { flex: 0 0 auto; width: 1.4rem; height: 1.4rem; }
   .pagination-text { display: flex; flex: 1; flex-direction: column; gap: .25rem; min-width: 0; }
   .pagination-label { color: #516b59; font-size: .8rem; font-weight: 650; }

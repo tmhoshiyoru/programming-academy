@@ -1,6 +1,7 @@
 ---
 title: 互動小遊戲範本
 type: game
+supplementary: false
 summary: 以三段程式碼組成可互動的小遊戲
 order: 1
 hidden: false

@@ -1,6 +1,7 @@
 ---
 title: 練習題範本
 type: exercise
+supplementary: false
 summary: OJ 題目格式；範例輸入與輸出可直接複製
 order: 1
 hidden: false

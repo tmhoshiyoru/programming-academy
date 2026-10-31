@@ -174,6 +174,14 @@ const { title, description = '課程與互動練習' } = Astro.props;
   .content-kind-knowledge { --content-bg: #edf5ff; --content-ink: #245b92; --content-border: #b5cde8; }
   .content-kind-exercise { --content-bg: #fff5de; --content-ink: #80540b; --content-border: #e4cc91; }
   .content-kind-game { --content-bg: #f3edff; --content-ink: #68449d; --content-border: #cfc0e7; }
+  .content-kind-interactive { --content-bg: #edf8ef; --content-ink: #276342; --content-border: #a8d0b4; }
+  .is-supplementary { --content-bg: #fff0f4; --content-ink: #842446; --content-border: #d3a0b0; }
+  .article.is-supplementary { border-color: #d3a0b0; box-shadow: inset 4px 0 0 #aa5772; }
+  .article.is-supplementary > h1 { color: #842446; }
+  .article.is-supplementary .interactive-block { border-color: #d3a0b0; }
+  .supplementary-tag { margin-left: .15rem; padding-left: .5rem; border-left: 1px solid currentColor; }
+  .game-supplementary-label { margin-bottom: .8rem; }
+  .tree-supplementary-label { display: block; color: var(--content-ink); font-size: .7rem; font-weight: 750; }
   .content-icon { display: block; flex: 0 0 auto; width: 1.15rem; height: 1.15rem; }
   .content-type { display: inline-flex; align-items: center; gap: .45rem; width: fit-content; padding: .3rem .6rem; color: var(--content-ink); background: var(--content-bg); border-radius: .45rem; font-size: .83rem; font-weight: 750; line-height: 1.4; }
   .article > .content-type { margin-bottom: .8rem; }

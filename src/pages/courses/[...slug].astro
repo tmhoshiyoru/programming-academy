@@ -82,12 +82,12 @@ const childLessons = children.filter(node => node.type);
         </section>
       ) : course && Content && (
       <>
-      {course.data.type === 'game' && <div class="game-breadcrumbs"><CourseBreadcrumbs courseId={currentCourseId} courseTitle={courseTitle ?? currentCourseId} chapters={ancestors} /></div>}
-      <article class:list={['article', { 'game-article': course.data.type === 'game' }]}>
+      {course.data.type === 'game' && <div class="game-breadcrumbs"><CourseBreadcrumbs courseId={currentCourseId} courseTitle={courseTitle ?? currentCourseId} chapters={ancestors} />{course.data.supplementary && <span class="content-type is-supplementary game-supplementary-label">補充教材</span>}</div>}
+      <article class:list={['article', { 'game-article': course.data.type === 'game', 'is-supplementary': course.data.supplementary }]}>
         {course.data.type === 'game' && gameBlocks ? <GamePreview blocks={gameBlocks} /> : (
           <>
             <CourseBreadcrumbs courseId={currentCourseId} courseTitle={courseTitle ?? currentCourseId} chapters={ancestors} />
-            <ContentTypeBadge type={course.data.type} />
+            <ContentTypeBadge type={course.data.type} supplementary={course.data.supplementary} />
             <h1>{course.data.title}</h1>
             {course.data.summary && <p class="summary">{course.data.summary}</p>}
             {course.data.type === 'exercise' ? <div class="exercise-content"><Content /></div> : <Content />}
@@ -103,6 +103,7 @@ const childLessons = children.filter(node => node.type);
 
 <script>
   import '../../scripts/code-blocks';
+  import '../../scripts/interactive-previews';
   document.querySelectorAll<HTMLElement>('.exercise-content').forEach((content) => {
     const headings = [...content.querySelectorAll<HTMLHeadingElement>('h3')];
     for (const inputHeading of headings) {
@@ -148,5 +149,7 @@ const childLessons = children.filter(node => node.type);
   .game-article { overflow: hidden; padding: 0; }
   .game-breadcrumbs { padding: .25rem .35rem 0; }
   .game-preview { display: block; width: 100%; height: 1px; min-height: 0; border: 0; border-radius: 1rem; background: #fff; }
+  .interactive-block { min-width: 0; margin: 1.5rem 0 2rem; overflow: hidden; border: 1px solid #a5c9b2; border-radius: .8rem; background: #f3faf5; }
+  .interactive-preview { display: block; width: 100%; height: 1px; min-height: 0; border: 0; background: #f3faf5; }
   @media (max-width: 520px) { .sample-case { grid-template-columns: 1fr; } }
 </style>
