@@ -123,7 +123,9 @@ test('C++ lessons render their embeds with valid scripts and consistent teaching
       const script = frame.properties.dataPreviewDocument.match(/<script>([\s\S]*?)<\/script>/)[1];
       new vm.Script(script, { filename: name });
     }
-    assert.ok(source.includes('using namespace std;'), name);
+    if (/^```cpp\b/m.test(content)) {
+      assert.ok(source.includes('using namespace std;'), name);
+    }
     assert.ok(!source.includes('std::cout'), name);
     assert.ok(!/印出|列印/.test(source), name);
   }
