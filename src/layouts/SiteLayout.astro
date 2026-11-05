@@ -5,9 +5,10 @@ import { siteUrl } from '../lib/site-url';
 interface Props {
   title: string;
   description?: string;
+  hideShrineLink?: boolean;
 }
 
-const { title, description = '課程與互動練習' } = Astro.props;
+const { title, description = '課程與互動練習', hideShrineLink = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -26,6 +27,13 @@ const { title, description = '課程與互動練習' } = Astro.props;
     </header>
     <main><slot /></main>
     <footer class="site-footer">小綠綠程式學苑</footer>
+    {!hideShrineLink && <a class="shrine-float-link" href={siteUrl('/shrine/')} aria-label="前往網海神社" title="網海神社">
+        <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <path d="M5 9c12 3 26 3 38 0l-2 5c-11 2-23 2-34 0L5 9Z" />
+          <path d="M10 17h28v4H10zM13 20h4v21h-4zM31 20h4v21h-4zM8 40h32v4H8z" />
+          <path d="M8 15h32" />
+        </svg>
+      </a>}
   </body>
 </html>
 
@@ -98,6 +106,9 @@ const { title, description = '課程與互動練習' } = Astro.props;
   .site-header nav a:hover { background: #e8f0e9; }
   main { width: min(1440px, calc(100% - 2rem)); min-height: calc(100vh - 8rem); margin: 2.25rem auto; }
   .site-footer { padding: 1.5rem; text-align: center; color: #3d5145; border-top: 1px solid #c5d2c9; background: #e9eee8; }
+  .shrine-float-link { position: fixed; right: max(1.1rem, env(safe-area-inset-right)); bottom: max(1.1rem, env(safe-area-inset-bottom)); z-index: 20; display: grid; place-items: center; width: 3.6rem; height: 3.6rem; color: #f9e9c4; background: linear-gradient(145deg,#b64538,#7f211f); border: 2px solid #d6bb7c; border-radius: 50%; box-shadow: 0 5px 18px #07192380, inset 0 0 0 3px #ffffff20; transition: transform .18s ease, filter .18s ease; }
+  .shrine-float-link:hover { color: #fff4d9; transform: translateY(-3px); filter: brightness(1.12); }
+  .shrine-float-link svg { width: 2.15rem; height: 2.15rem; fill: currentColor; stroke: #f9e9c4; stroke-width: 1.25; stroke-linecap: square; stroke-linejoin: round; }
   .page-grid { display: block; }
   .page-grid.sidebar-pinned { display: grid; grid-template-columns: minmax(250px, 310px) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
   main:has(.page-grid.sidebar-pinned) { margin-top: 0; }
@@ -134,7 +145,8 @@ const { title, description = '課程與互動練習' } = Astro.props;
   .sidebar-pin svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .sidebar-empty { color: #354b3f; }
   .tree-nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-top: .55rem; }
-  .sidebar-tools { flex: 0 0 auto; padding-top: .75rem; border-top: 1px solid #d6e0d8; }
+  .sidebar-tools { flex: 0 0 auto; padding-top: .5rem; border-top: 1px solid #d6e0d8; }
+  .sidebar-tools-heading { margin: 0 0 .2rem; padding: .25rem .5rem; color: #3a5044; font-size: .82rem; font-weight: 800; }
   .sidebar-tools a { display: flex; align-items: center; gap: .65rem; padding: .6rem .5rem; color: #163d2e; border-radius: .55rem; font-weight: 750; text-decoration: none; }
   .sidebar-tools a:hover { background: #e8f1e8; }
   .sidebar-tools svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }

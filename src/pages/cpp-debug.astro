@@ -1,0 +1,99 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { siteUrl } from '../lib/site-url';
+
+const example = `#include <iostream>
+using namespace std;
+
+int main() {
+    int score = 85
+    cout << score << endl;
+}`;
+---
+
+<SiteLayout title="C++ Debug 工具" description="在瀏覽器裡檢查 C++ 程式，查看錯誤位置與繁中提示。">
+  <section class="article cpp-debug" data-worker={siteUrl('/cpp-compiler/check-worker.js')}>
+    <p class="eyebrow">獨立工具</p>
+    <h1>C++ Debug 工具</h1>
+    <p>貼上單檔 C++17 程式，檢查編譯錯誤和警告。程式碼留在你的瀏覽器內。</p>
+    <div class="editor-header">
+      <label for="cpp-source">C++ 程式碼</label>
+      <button type="button" id="cpp-example">載入範例</button>
+    </div>
+    <div class="cpp-editor">
+      <div class="cpp-gutter" aria-hidden="true"><pre id="cpp-line-numbers"></pre></div>
+      <div class="cpp-highlight" aria-hidden="true"><pre id="cpp-highlight"></pre></div>
+      <textarea id="cpp-source" rows="12" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off">{example}</textarea>
+    </div>
+    <div class="actions">
+      <button type="button" id="cpp-check">檢查程式</button>
+      <button type="button" id="cpp-stop" hidden>停止檢查</button>
+    </div>
+    <p class="load-note">首次檢查需載入約 28 MB 的編譯工具。</p>
+    <section class="result" aria-labelledby="cpp-result-title">
+      <h2 id="cpp-result-title">檢查結果</h2>
+      <p id="cpp-status" role="status">按「檢查程式」找找看範例裡的錯誤。</p>
+      <ol id="cpp-diagnostics" hidden></ol>
+      <details id="cpp-raw" hidden>
+        <summary>原始編譯器訊息</summary>
+        <pre><code id="cpp-log"></code></pre>
+      </details>
+    </section>
+  </section>
+</SiteLayout>
+
+<script>
+  import '../scripts/cpp-debug';
+</script>
+
+<style>
+  .cpp-debug { max-width: 68rem; margin-inline: auto; }
+  .editor-header, .actions { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; }
+  .editor-header { justify-content: space-between; margin-bottom: .45rem; }
+  label { font-weight: 700; }
+  .cpp-editor { --cpp-gutter-width: 2.2rem; position: relative; overflow: hidden; border: 1px solid #88a594; border-radius: .6rem; background: #f8fbf8; }
+  .cpp-editor:focus-within { outline: 2px solid #bd861e; outline-offset: 2px; }
+  .cpp-editor :is(textarea, pre) {
+    margin: 0;
+    padding: .8rem;
+    color: #192d23;
+    font: .95rem/1.5 ui-monospace, monospace;
+    font-variant-ligatures: none;
+    tab-size: 4;
+    white-space: pre;
+  }
+  .cpp-editor textarea { position: relative; display: block; box-sizing: border-box; margin-inline-start: var(--cpp-gutter-width); width: calc(100% - var(--cpp-gutter-width)); min-height: 12rem; resize: vertical; border: 0; outline: 0; background: transparent; }
+  .cpp-editor pre { overflow: visible; background: transparent; border: 0; border-radius: 0; }
+  .cpp-highlight, .cpp-gutter { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .cpp-highlight { inset-inline-start: var(--cpp-gutter-width); visibility: hidden; }
+  .cpp-gutter { box-sizing: border-box; inset-inline-end: auto; width: var(--cpp-gutter-width); background: #edf4ef; border-inline-end: 1px solid #cbdace; }
+  .cpp-gutter pre { padding-inline: .45rem; color: #486054; text-align: end; }
+  .cpp-editor.is-highlighted .cpp-highlight { visibility: visible; }
+  .cpp-editor.is-highlighted textarea { color: transparent; caret-color: #192d23; }
+  .cpp-editor.is-highlighted textarea::selection { color: transparent; background: #588ac654; }
+  .cpp-highlight :global(.token.keyword), .cpp-highlight :global(.token.directive) { color: #783b94; }
+  .cpp-highlight :global(.token.string), .cpp-highlight :global(.token.char) { color: #1b663f; }
+  .cpp-highlight :global(.token.number), .cpp-highlight :global(.token.boolean) { color: #9a471d; }
+  .cpp-highlight :global(.token.comment) { color: #52665b; }
+  .cpp-highlight :global(.token.function), .cpp-highlight :global(.token.class-name) { color: #215b98; }
+  .cpp-highlight :global(.token.operator) { color: #923443; }
+  @media (forced-colors: active) {
+    .cpp-editor.is-highlighted .cpp-highlight { visibility: hidden; }
+    .cpp-editor.is-highlighted textarea { color: FieldText; caret-color: auto; }
+    .cpp-editor.is-highlighted textarea::selection { color: HighlightText; background: Highlight; }
+  }
+  .actions { margin-top: .8rem; }
+  button { font: inherit; cursor: pointer; padding: .35rem .7rem; border: 1px solid #84a392; border-radius: .5rem; background: #f5faf6; color: #164330; }
+  button:disabled { opacity: .65; cursor: default; }
+  #cpp-check { background: #1b5843; color: white; font-weight: 700; }
+  .load-note { color: #485d52; font-size: .86rem; }
+  .result { margin-top: 1.2rem; padding: 1rem; border: 1px solid #bbd0c3; border-radius: .7rem; background: #f7faf7; }
+  .result h2 { margin-top: 0; }
+  .result summary { cursor: pointer; }
+  #cpp-log { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .result :global(li + li) { margin-top: .65rem; }
+  .result :global(li small) { display: block; overflow-wrap: anywhere; }
+  .result :global(li samp) { display: block; margin-block: .3rem; white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, monospace; }
+  .result :global(li button) { margin-inline-end: .4rem; font-size: .9rem; }
+  [hidden] { display: none !important; }
+</style>

@@ -1,0 +1,30 @@
+wasm-clang-runtime
+Copyright 2026 CppStudio
+
+This product includes software derived from wasm-clang
+(https://github.com/binji/wasm-clang),
+Copyright 2020 WebAssembly Community Group participants,
+licensed under the Apache License, Version 2.0.
+
+This product includes binaries built from the LLVM Project
+(https://llvm.org), licensed under the Apache License v2.0
+with LLVM Exceptions (see LICENSE.llvm).
+
+This product includes a sysroot derived from wasi-sdk
+(https://github.com/WebAssembly/wasi-sdk), licensed under
+the Apache License v2.0 with LLVM Exceptions.
+
+src/memfs/memfs.c is derived from wasm-clang's memfs (Apache 2.0),
+recompiled with an increased node limit.
+src/memfs/stb_sprintf.h is by Sean Barrett, public domain / MIT
+(see file header).
+
+Programming Academy bundles wasm-clang-runtime v0.1.0:
+https://github.com/cppstudio-io/wasm-clang-runtime/tree/v0.1.0
+Clang, LLD and the sysroot are the v0.1.0 release assets, gzip-compressed
+for serving as static files. The memfs binary was built from the tag's
+src/memfs/memfs.c and stb_sprintf.h with the flags from its build.sh,
+using the bundled Clang 22, LLD 22 and WASI sysroot.
+Programming Academy modified shared.js to skip size lookup for directories.
+The bundled sysroot replaces the teaching iostream stub with libc++'s
+original iostream header from llvmorg-22.1.8 (see LICENSE.llvm).

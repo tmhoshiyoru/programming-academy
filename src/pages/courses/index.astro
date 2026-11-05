@@ -12,5 +12,17 @@ const courses = visibleCourses(await getCollection('courseSettings'));
     <p class="eyebrow">學習空間</p>
     <h1>所有課程</h1>
     {courses.length ? <ul class="course-cards">{courses.map((course) => <li><a href={siteUrl(`/courses/${courseFolderId(course.id)}/`)}><strong>{course.data.title}</strong><br /><span>開啟課程</span></a></li>)}</ul> : <p>目前還沒有課程。請依照 README 的步驟新增課程設定檔。</p>}
+    <section class="tools-overview" aria-labelledby="tools-overview-title">
+      <h2 id="tools-overview-title">小工具</h2>
+      <p>課程以外的程式與網頁工具集中在這裡。</p>
+      <a class="tools-overview-link" href={siteUrl('/tools/')}>前往小工具</a>
+    </section>
   </section>
 </SiteLayout>
+
+<style>
+  .tools-overview { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #c5d2c9; }
+  .tools-overview h2 { margin: 0; color: #1a4834; font-size: 1.4rem; }
+  .tools-overview p { margin: .35rem 0 .8rem; }
+  .tools-overview-link { display: inline-block; padding: .5rem .9rem; border: 1px solid #9caf9f; border-radius: .55rem; font-weight: 700; text-decoration: none; }
+</style>

@@ -1,0 +1,37 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { siteUrl } from '../../lib/site-url';
+---
+
+<SiteLayout title="小工具" description="小綠綠程式學苑的網頁與程式輔助工具。">
+  <section class="article tools-page">
+    <p class="eyebrow">課程總覽 · 獨立工具</p>
+    <h1>小工具</h1>
+    <ul class="tool-cards">
+      <li>
+        <a href={siteUrl('/simulator/')}>
+          <span class="tool-icon" aria-hidden="true">▣</span>
+          <strong>網頁模擬器</strong>
+          <span>編輯 HTML、CSS 和 JavaScript，並即時預覽網頁。</span>
+        </a>
+      </li>
+      <li>
+        <a href={siteUrl('/cpp-debug/')}>
+          <span class="tool-icon" aria-hidden="true">⌘</span>
+          <strong>C++ Debug 工具</strong>
+          <span>檢查 C++ 程式的編譯錯誤，並查看容易理解的提示。</span>
+        </a>
+      </li>
+    </ul>
+  </section>
+</SiteLayout>
+
+<style>
+  .tools-page { max-width: 68rem; margin-inline: auto; }
+  .tool-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 1rem; margin: 1.5rem 0 0; padding: 0; list-style: none; }
+  .tool-cards a { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: .45rem .75rem; min-height: 10rem; padding: 1.25rem; color: #173d2d; background: #f6faf6; border: 1px solid #bdcec1; border-radius: .8rem; text-decoration: none; transition: transform .15s ease, box-shadow .15s ease; }
+  .tool-cards a:hover { transform: translateY(-2px); box-shadow: 0 8px 20px #203a2c18; }
+  .tool-cards strong { font-size: 1.18rem; }
+  .tool-cards a > span:last-child { grid-column: 2; color: #3a5044; }
+  .tool-icon { display: grid; grid-row: span 2; place-items: center; width: 2.5rem; height: 2.5rem; color: #1c5b42; background: #e5f0e5; border-radius: .65rem; font-size: 1.4rem; font-weight: 800; }
+</style>

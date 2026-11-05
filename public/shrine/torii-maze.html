@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>鳥居迷宮</title>
+  <style>
+    :root{color-scheme:dark;--gold:#e6c27b;--cream:#fff2d3;--red:#8f352b;--night:#172b2b}
+    *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0}body{overflow:hidden;background:#142424;color:var(--cream);font-family:system-ui,"Noto Sans TC",sans-serif}
+    .game{position:relative;display:grid;grid-template-rows:auto minmax(0,1fr) auto;width:100%;height:100dvh;min-height:340px;overflow:hidden;background:radial-gradient(ellipse at 50% 35%,#52634a,#243a35 65%,#172727)}
+    header{z-index:2;min-height:4.2rem;padding:.5rem 1rem .35rem;text-align:center;text-shadow:0 2px 5px #111}.title{margin:.05rem 0;color:#fff0cc;font-family:serif;font-size:clamp(1.05rem,3vw,1.55rem);letter-spacing:.08em}.hint{margin:0;color:#e4d6b6;font-size:.72rem}
+    .world{position:relative;min-height:0;overflow:hidden;margin:.2rem .65rem;border:2px solid #b98e51;border-radius:1rem;background:radial-gradient(#d9c78d30 1px,transparent 1.5px),linear-gradient(180deg,#294a46,#3f5b43 60%,#263d34);background-size:19px 21px,auto;box-shadow:inset 0 0 0 5px #53352c,0 8px 24px #0b1717aa;touch-action:none}
+    canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+    .status{position:absolute;z-index:4;top:.7rem;left:50%;width:max-content;max-width:88%;margin:0;padding:.45rem .8rem;transform:translateX(-50%);border:1px solid #e4c78399;border-radius:999px;background:#112825e8;color:#fff3d1;text-align:center;font-size:.72rem;box-shadow:0 3px 12px #1118;pointer-events:none}
+    .exit-banner{position:fixed;z-index:5;inset:0;display:grid;place-items:center;padding:1rem;background:#101c1bd1;backdrop-filter:blur(3px)}.exit-banner[hidden]{display:none}.exit-card{width:min(340px,90%);padding:1.2rem;border:2px solid var(--gold);border-radius:1rem;background:#f8efd9;color:#3d3025;text-align:center;box-shadow:0 12px 36px #091615aa}.exit-card h2{margin:0 0 .35rem;color:#87362c;font-family:serif}.exit-card p{margin:.2rem 0 1rem}.again{padding:.65rem 1.2rem;border:1px solid #d5b46c;border-radius:999px;background:linear-gradient(#a44736,#752e28);color:#fff3d5;font:inherit;font-weight:750;cursor:pointer}
+    .controls{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.55rem .8rem max(.6rem,env(safe-area-inset-bottom));background:#132725bb}.keys-hint{color:#d7d0b7;font-size:.68rem}.dpad{display:grid;grid-template-columns:repeat(3,42px);grid-template-rows:repeat(2,38px);gap:3px}.dpad button{border:1px solid #e4c783a8;border-radius:10px;background:#76523dc7;color:#fff1d2;font-size:1rem;touch-action:manipulation;cursor:pointer}.dpad button:active{background:#c2934d;color:#172b2b}.dpad [data-dir=up]{grid-column:2}.dpad [data-dir=left]{grid-column:1;grid-row:2}.dpad [data-dir=down]{grid-column:2;grid-row:2}.dpad [data-dir=right]{grid-column:3;grid-row:2}
+    @media(max-width:620px){header{padding-top:.45rem}.hint{font-size:.65rem}.world{margin:.2rem .4rem}.controls{justify-content:center}.keys-hint{display:none}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="game" aria-label="鳥居迷宮遊戲">
+    <header><h1 class="title" id="story-title">你在鳥居上發現一隻螞蟻</h1><p class="hint" id="story-hint">觀察牠沿著木頭上的刻紋慢慢前進。</p></header>
+    <section class="world" id="world" aria-label="鳥居輪廓上的微型迷宮">
+      <div class="status" id="status" aria-live="polite">螞蟻在鳥居左下角，沿著柱身上的刻紋往上走。</div>
+      <canvas id="maze" aria-label="鳥居迷宮道路地圖"></canvas>
+      <div class="exit-banner" id="exit-banner" hidden><div class="exit-card"><h2>螞蟻找到出口了！</h2><p>牠沿著鳥居上的刻紋抵達另一側。</p><button class="again" id="again" type="button">再玩一次</button></div></div>
+    </section>
+    <footer class="controls"><span class="keys-hint">鍵盤：↑ ↓ ← → 或 W A S D</span><div class="dpad" aria-label="方向控制">
+      <button type="button" data-dir="up" aria-label="向上">↑</button><button type="button" data-dir="left" aria-label="向左">←</button><button type="button" data-dir="down" aria-label="向下">↓</button><button type="button" data-dir="right" aria-label="向右">→</button>
+    </div></footer>
+  </main>
+  <script>
+    (()=>{
+      const canvas=document.querySelector('#maze'),ctx=canvas.getContext('2d'),world=document.querySelector('#world'),status=document.querySelector('#status'),banner=document.querySelector('#exit-banner'),storyTitle=document.querySelector('#story-title'),storyHint=document.querySelector('#story-hint');
+      const key=(x,y)=>`${x},${y}`,directions={up:[0,-1],right:[1,0],down:[0,1],left:[-1,0]};
+      let graph=new Map(),potentialEdges=[],player={x:3,y:11},facing='up',won=false,moving=false,queuedDirection=null,dpr=1,cell=320,origin={x:0,y:0},camera={x:0,y:0},viewWidth=0,viewHeight=0;
+      function makeMaze(){
+        graph=new Map();
+        // 迷宮格只落在鳥居的橫木與兩根柱子上，隨機深度優先走訪會生成連通的多岔路。
+        const cells=[];
+        for(let y=2;y<=4;y++)for(let x=1;x<=15;x++)cells.push([x,y]);
+        for(let y=5;y<=11;y++)for(const x of [2,3,4,12,13,14])cells.push([x,y]);
+        const valid=new Set(cells.map(([x,y])=>key(x,y))),visited=new Set(),stack=[[3,11]];potentialEdges=[];
+        for(const [x,y] of cells)for(const [dx,dy] of [[1,0],[0,1]])if(valid.has(key(x+dx,y+dy)))potentialEdges.push([key(x,y),key(x+dx,y+dy)]);
+        visited.add(key(3,11));graph.set(key(3,11),new Set());
+        while(stack.length){
+          const [x,y]=stack[stack.length-1];
+          const options=Object.values(directions).map(([dx,dy])=>[x+dx,y+dy]).filter(([nx,ny])=>valid.has(key(nx,ny))&&!visited.has(key(nx,ny)));
+          if(!options.length){stack.pop();continue}
+          const [nx,ny]=options[Math.floor(Math.random()*options.length)],a=key(x,y),b=key(nx,ny);
+          if(!graph.has(a))graph.set(a,new Set());if(!graph.has(b))graph.set(b,new Set());graph.get(a).add(b);graph.get(b).add(a);visited.add(b);stack.push([nx,ny]);
+        }
+        // 入口保留三個可選方向；其餘路線加上回路，減少走進單一死巷的機會。
+        for(const [x,y] of [[3,10],[2,11],[4,11]]){const a=key(3,11),b=key(x,y);graph.get(a).add(b);graph.get(b).add(a)}
+        for(const [a,b] of potentialEdges){if(graph.get(a)?.has(b))continue;if(Math.random()<.24){graph.get(a).add(b);graph.get(b).add(a)}}
+        player={x:3,y:11};facing='up';won=false;moving=false;queuedDirection=null;banner.hidden=true;status.textContent='沿著清楚的刻紋移動，木面上的橫檔表示不能通行。';resize();updateStory();
+      }
+      function resize(){
+        const rect=world.getBoundingClientRect();dpr=Math.min(devicePixelRatio||1,2);viewWidth=rect.width;viewHeight=rect.height;
+        // 每一格固定約 320px（上一版的五倍）；鏡頭只顯示螞蟻附近，鳥居本身不受視窗尺寸縮放。
+        cell=320;canvas.width=Math.floor(viewWidth*dpr);canvas.height=Math.floor(viewHeight*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+        origin={x:cell*1.5,y:cell*1.5};camera=targetCamera(player.x,player.y);draw();
+      }
+      const point=(x,y)=>({x:origin.x+x*cell,y:origin.y+y*cell});
+      function targetCamera(x,y){const p=point(x,y);return{x:p.x-viewWidth/2,y:p.y-viewHeight/2}}
+      function toriiPath(){ctx.beginPath();ctx.rect(...rect(1,2,14,2));ctx.rect(...rect(2,4,2,7));ctx.rect(...rect(12,4,2,7))}
+      function xy(x,y){const p=point(x,y);return[p.x,p.y]}
+      function draw(){if(!ctx||!viewWidth)return;ctx.clearRect(0,0,viewWidth,viewHeight);ctx.save();ctx.translate(-camera.x,-camera.y);
+        // 先畫鳥居本體，令迷宮看起來是刻在朱紅木頭上的紋路，而非浮在草地上的路。
+        ctx.save();toriiPath();ctx.shadowColor='#0b1717';ctx.shadowBlur=cell*.28;ctx.fillStyle='#752e28';ctx.fill();ctx.restore();
+        ctx.save();toriiPath();ctx.clip();
+        const wood=ctx.createLinearGradient(0,origin.y,0,origin.y+cell*12);wood.addColorStop(0,'#bd6646');wood.addColorStop(.48,'#963b31');wood.addColorStop(1,'#662b28');ctx.fillStyle=wood;ctx.fillRect(origin.x-cell,origin.y-cell,cell*18,cell*14);
+        // 木紋、漆面細線與金色邊飾讓柱體仍保有鳥居木構的質感。
+        for(let i=0;i<48;i++){const y=origin.y-cell+i*cell*.31;ctx.strokeStyle=i%3?'#f0bf6b20':'#f4d18c35';ctx.lineWidth=i%3?2:5;ctx.beginPath();ctx.moveTo(origin.x-cell,y);ctx.bezierCurveTo(origin.x+cell*4,y+cell*.05,origin.x+cell*10,y-cell*.04,origin.x+cell*17,y+cell*.02);ctx.stroke()}
+        // 木面加入格狀木板接縫、細金屬鉚釘與漆面刮痕，放大後仍看得到材質層次。
+        ctx.strokeStyle='#4d292944';ctx.lineWidth=5;
+        for(let y=2;y<=4;y++){const py=point(1,y).y;ctx.beginPath();ctx.moveTo(point(1,y).x,py+cell*.48);ctx.lineTo(point(15,y).x,py+cell*.48);ctx.stroke()}
+        for(const x of [2,3,4,12,13,14])for(let y=5;y<11;y++){const px=point(x,y).x;ctx.beginPath();ctx.moveTo(px+cell*.48,point(x,y).y);ctx.lineTo(px+cell*.48,point(x,y+1).y);ctx.stroke()}
+        for(const [x,y] of [[1.4,2.25],[14.6,2.25],[2.3,10.8],[3.7,10.8],[12.3,10.8],[13.7,10.8],[2.3,4.3],[3.7,4.3],[12.3,4.3],[13.7,4.3]]){const p=point(x,y);ctx.beginPath();ctx.arc(p.x,p.y,cell*.035,0,Math.PI*2);ctx.fillStyle='#f2d58e';ctx.fill();ctx.strokeStyle='#6c392d';ctx.lineWidth=4;ctx.stroke()}
+        ctx.strokeStyle='#e8c273';ctx.lineWidth=Math.max(2,cell*.09);ctx.strokeRect(...rect(1,2,14,2));ctx.strokeRect(...rect(2,4,2,7));ctx.strokeRect(...rect(12,4,2,7));
+        // 先在每個未連通的方向刻上橫向阻隔，清楚標出「木面」與可走刻紋的差異。
+        ctx.lineCap='square';ctx.lineJoin='round';
+        for(const [a,b] of potentialEdges){if(graph.get(a)?.has(b))continue;const [ax,ay]=a.split(',').map(Number),[bx,by]=b.split(',').map(Number),pa=point(ax,ay),pb=point(bx,by),mx=(pa.x+pb.x)/2,my=(pa.y+pb.y)/2;
+          ctx.strokeStyle='#351e20';ctx.lineWidth=cell*.44;ctx.beginPath();if(ay===by){ctx.moveTo(mx,my-cell*.25);ctx.lineTo(mx,my+cell*.25)}else{ctx.moveTo(mx-cell*.25,my);ctx.lineTo(mx+cell*.25,my)}ctx.stroke();
+          ctx.strokeStyle='#8d3e32';ctx.lineWidth=cell*.29;ctx.beginPath();if(ay===by){ctx.moveTo(mx,my-cell*.25);ctx.lineTo(mx,my+cell*.25)}else{ctx.moveTo(mx-cell*.25,my);ctx.lineTo(mx+cell*.25,my)}ctx.stroke();
+          ctx.strokeStyle='#e5b96b';ctx.lineWidth=cell*.035;ctx.beginPath();if(ay===by){ctx.moveTo(mx-cell*.11,my-cell*.25);ctx.lineTo(mx-cell*.11,my+cell*.25);ctx.moveTo(mx+cell*.11,my-cell*.25);ctx.lineTo(mx+cell*.11,my+cell*.25)}else{ctx.moveTo(mx-cell*.25,my-cell*.11);ctx.lineTo(mx+cell*.25,my-cell*.11);ctx.moveTo(mx-cell*.25,my+cell*.11);ctx.lineTo(mx+cell*.25,my+cell*.11)}ctx.stroke();
+        }
+        // 通道加上深色外框、金色路面與淺色中心，與朱紅木板明確區隔。
+        ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#3d201e';ctx.lineWidth=cell*.52;
+        for(const [a,neighbors] of graph){for(const b of neighbors){if(a.localeCompare(b)>0)continue;const [ax,ay]=a.split(',').map(Number),[bx,by]=b.split(',').map(Number),pa=point(ax,ay),pb=point(bx,by);ctx.beginPath();ctx.moveTo(pa.x,pa.y);ctx.lineTo(pb.x,pb.y);ctx.stroke()}}
+        ctx.strokeStyle='#f1c66e';ctx.lineWidth=cell*.37;
+        for(const [a,neighbors] of graph){for(const b of neighbors){if(a.localeCompare(b)>0)continue;const [ax,ay]=a.split(',').map(Number),[bx,by]=b.split(',').map(Number),pa=point(ax,ay),pb=point(bx,by);ctx.beginPath();ctx.moveTo(pa.x,pa.y);ctx.lineTo(pb.x,pb.y);ctx.stroke()}}
+        ctx.strokeStyle='#fff0bd';ctx.lineWidth=cell*.14;
+        for(const [a,neighbors] of graph){for(const b of neighbors){if(a.localeCompare(b)>0)continue;const [ax,ay]=a.split(',').map(Number),[bx,by]=b.split(',').map(Number),pa=point(ax,ay),pb=point(bx,by);ctx.beginPath();ctx.moveTo(pa.x,pa.y);ctx.lineTo(pb.x,pb.y);ctx.stroke()}}
+        for(const node of graph.keys()){const [x,y]=node.split(',').map(Number),p=point(x,y);ctx.beginPath();ctx.arc(p.x,p.y,cell*.12,0,Math.PI*2);ctx.fillStyle='#fff0bd';ctx.fill();ctx.strokeStyle='#5b3028';ctx.lineWidth=cell*.035;ctx.stroke()}
+        // 鳥居橫木的上、下緣與兩根立柱描金，清楚呈現完整鳥居輪廓。
+        ctx.strokeStyle='#e9c77f';ctx.lineWidth=cell*.13;ctx.strokeRect(...rect(1,2,14,2));ctx.strokeRect(...rect(2,4,2,7));ctx.strokeRect(...rect(12,4,2,7));
+        ctx.restore();
+        drawGateDetails();drawGoal(point(13,11));ctx.restore();drawAnt({x:viewWidth/2,y:viewHeight/2});
+      }
+      function rect(x,y,width,height){const p=point(x,y);return[p.x,p.y,cell*width,cell*height]}
+      function drawGateDetails(){
+        // 橫木上方加上笠木弧線與金色端飾，避免迷宮外形被誤認為普通方框。
+        const top=point(1,2),right=point(15,2);ctx.beginPath();ctx.moveTo(top.x-cell*.35,top.y-cell*.45);ctx.quadraticCurveTo((top.x+right.x)/2,top.y-cell*.95,right.x+cell*.35,right.y-cell*.45);ctx.lineTo(right.x+cell*.3,right.y-cell*.18);ctx.lineTo(top.x-cell*.3,top.y-cell*.18);ctx.closePath();ctx.fillStyle='#642b27';ctx.fill();ctx.strokeStyle='#edc874';ctx.lineWidth=Math.max(2,cell*.07);ctx.stroke();
+        for(const [x,y] of [[2,2],[14,2],[2,11],[14,11]]){const p=point(x,y);ctx.fillStyle='#e7c273';ctx.beginPath();ctx.arc(p.x,p.y,cell*.13,0,Math.PI*2);ctx.fill()}
+      }
+      function drawGoal(p){ctx.save();ctx.shadowColor='#ffe58c';ctx.shadowBlur=cell*.28;ctx.fillStyle='#fff0a8';ctx.beginPath();ctx.arc(p.x,p.y,cell*.12,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='#f4c65e';ctx.lineWidth=cell*.045;ctx.beginPath();ctx.arc(p.x,p.y,cell*.2,0,Math.PI*2);ctx.stroke();ctx.restore()}
+      function drawAnt(p){
+        // 螞蟻只有木格的一小部分大，行走範圍由迷宮節點限制在鳥居木面內。
+        ctx.save();ctx.translate(p.x,p.y);ctx.rotate(({up:-Math.PI/2,right:0,down:Math.PI/2,left:Math.PI})[facing]);ctx.scale(1.8,1.8);ctx.lineCap='round';ctx.strokeStyle='#291c18';ctx.lineWidth=2.2;
+        for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(-2,0);ctx.lineTo(-7,side*5);ctx.lineTo(-10,side*7);ctx.moveTo(1,1);ctx.lineTo(-1,side*7);ctx.lineTo(-4,side*9);ctx.moveTo(4,0);ctx.lineTo(7,side*5);ctx.lineTo(10,side*7);ctx.stroke()}
+        ctx.beginPath();ctx.moveTo(7,-2);ctx.quadraticCurveTo(11,-9,14,-7);ctx.moveTo(7,2);ctx.quadraticCurveTo(12,8,15,6);ctx.strokeStyle='#e9c77f';ctx.lineWidth=1.5;ctx.stroke();
+        for(const [x,r] of [[-4,3.3],[2,3.8],[8,3.4]]){ctx.beginPath();ctx.arc(x,0,r,0,Math.PI*2);ctx.fillStyle='#3c211a';ctx.fill();ctx.strokeStyle='#bd8050';ctx.lineWidth=1;ctx.stroke()}
+        ctx.beginPath();ctx.arc(9,-1.2,0.75,0,Math.PI*2);ctx.arc(9,1.2,0.75,0,Math.PI*2);ctx.fillStyle='#fff1ce';ctx.fill();ctx.restore();
+      }
+      function move(dir){
+        if(won)return;if(moving){queuedDirection=dir;return}
+        const [dx,dy]=directions[dir],nextX=player.x+dx,nextY=player.y+dy,here=key(player.x,player.y),next=key(nextX,nextY);
+        facing=dir;draw();
+        if(!graph.get(here)?.has(next)){status.textContent='前方是鳥居木面，沒有金色刻紋；試著沿著亮起的道路轉彎。';return}
+        moving=true;status.textContent='螞蟻正沿著金色刻紋慢慢爬行。';const from=camera,to=targetCamera(nextX,nextY),started=performance.now(),duration=460;
+        function animate(now){const t=Math.min(1,(now-started)/duration),ease=t*t*(3-2*t);camera={x:from.x+(to.x-from.x)*ease,y:from.y+(to.y-from.y)*ease};draw();if(t<1){requestAnimationFrame(animate);return}
+          player={x:nextX,y:nextY};moving=false;if(player.x===13&&player.y===11){won=true;banner.hidden=false;status.textContent='螞蟻沿著刻紋走到鳥居出口了！';storyTitle.textContent='螞蟻找到出口了！';storyHint.textContent='牠沿著鳥居上的刻紋抵達另一側。'}else{status.textContent='螞蟻停在刻紋路口，可以繼續探索。';updateStory()}draw();if(queuedDirection){const queued=queuedDirection;queuedDirection=null;move(queued)}
+        }
+        requestAnimationFrame(animate);
+      }
+      function stepsToExit(startX=player.x,startY=player.y){const start=key(startX,startY),goal=key(13,11),queue=[[start,0]],seen=new Set([start]);while(queue.length){const [node,steps]=queue.shift();if(node===goal)return steps;for(const next of graph.get(node)||[]){if(seen.has(next))continue;seen.add(next);queue.push([next,steps+1])}}return 0}
+      function updateStory(){const remaining=stepsToExit();if(remaining>18){storyTitle.textContent='你在鳥居上發現一隻螞蟻';storyHint.textContent='觀察牠沿著木頭上的刻紋慢慢前進。'}else if(remaining>9){storyTitle.textContent='螞蟻正沿著橫木前進';storyHint.textContent='牠似乎正往鳥居另一側移動，看看接下來會怎麼走。'}else if(remaining>3){storyTitle.textContent='螞蟻快接近鳥居另一側了';storyHint.textContent='出口已經不遠，牠正沿著刻紋繼續前進。'}else{storyTitle.textContent='出口就在前方';storyHint.textContent='再沿著刻紋走幾步，螞蟻就能抵達出口。'}}
+      document.addEventListener('keydown',event=>{const d={ArrowUp:'up',w:'up',W:'up',ArrowRight:'right',d:'right',D:'right',ArrowDown:'down',s:'down',S:'down',ArrowLeft:'left',a:'left',A:'left'}[event.key];if(d){event.preventDefault();move(d)}});
+      document.querySelectorAll('.dpad button').forEach(button=>button.addEventListener('click',()=>move(button.dataset.dir)));
+      document.querySelector('#again').addEventListener('click',makeMaze);new ResizeObserver(resize).observe(world);window.addEventListener('resize',resize);makeMaze();
+    })();
+  </script>
+</body>
+</html>

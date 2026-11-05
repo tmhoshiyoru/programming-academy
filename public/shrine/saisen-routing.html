@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#241714">
+  <title>賽錢箱裡的封包道路</title>
+  <style>
+    :root{color-scheme:dark;--gold:#efcb77;--gold-light:#ffe6a2;--wood:#3b241a;--wood-dark:#201511;--road:#dabd82;--road-edge:#8f6942;--mint:#a6e1c0;--paper:#f9edcf;--available-height:100vh}
+    *{box-sizing:border-box}
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#17100e;color:#f9edcf;font-family:system-ui,"Noto Serif TC",serif}
+    body{height:var(--available-height);padding:8px;background:radial-gradient(ellipse at top,#63402c,#241714 72%)}
+    button{font:inherit;color:inherit;cursor:pointer}
+    .game{width:min(1200px,100%);height:100%;margin:0 auto;display:flex;flex-direction:column}
+    .heading{text-align:center;margin:0 auto 8px;flex:0 0 auto}
+    .eyebrow{margin:0;color:#e4c88e;font-size:.78rem;letter-spacing:.2em}
+    h1{margin:.15rem 0;color:#fff0ca;font-family:"Noto Serif TC",serif;font-size:clamp(1.15rem,3vw,1.7rem);letter-spacing:.1em}
+    .lead{margin:.15rem 0 0;color:#dbcbb0;font-size:.8rem}
+    .chest{position:relative;flex:1;min-height:0;overflow:hidden;padding:9px;border:6px solid #75432b;border-radius:16px;background:linear-gradient(135deg,#573622,#392319 46%,#4a2d1d);box-shadow:inset 0 0 0 3px #b17e44,inset 0 0 46px #160e0b,0 10px 24px #0008;display:flex;flex-direction:column}
+    .chest:before,.chest:after{content:"";position:absolute;z-index:0;left:0;right:0;height:7px;background:linear-gradient(90deg,#b2854b,#e0ba6d,#81532f);box-shadow:0 2px 5px #170e0b}
+    .chest:before{top:16%}.chest:after{bottom:13%}
+    .play-area{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);align-items:center;gap:12px;flex:1;min-height:0;width:100%;margin:auto}
+    .board-wrap{position:relative;z-index:1;width:100%;height:calc(var(--available-height) - 205px);max-height:100%;margin:auto;padding:6px;transform:translateY(-22px);border:2px solid #b99153;border-radius:12px;background:linear-gradient(145deg,#30251d,#191614);box-shadow:inset 0 0 0 3px #6a4b30,0 6px 16px #100b08}
+    .board{position:relative;display:grid;width:100%;height:100%;overflow:hidden;border-radius:6px;background-color:#27302a;background-image:radial-gradient(#b9a16b20 1px,transparent 1.5px),linear-gradient(135deg,#354137,#27332c);background-size:17px 17px,100% 100%;outline:none;touch-action:manipulation}
+    .road-cell{position:relative;min-width:0;min-height:0}
+    .road-cell.is-destination{z-index:2;border-radius:8px;background:radial-gradient(circle,#ffe9a4,#efc65e 70%,#d39b35);box-shadow:inset 0 0 0 3px #fff0b5,0 0 18px #ffd65f99}
+    .road-segment{position:absolute;z-index:1;background:linear-gradient(90deg,#997447,#e2c792 25%,#f3dfad 50%,#c7a875 78%,#89653f);box-shadow:0 0 7px #f4d89c55}
+    .road-segment.n,.road-segment.s{left:calc(50% - 7px);width:14px;height:50%}
+    .road-segment.n{top:0}.road-segment.s{top:50%}
+    .road-segment.e,.road-segment.w{top:calc(50% - 7px);height:14px;width:50%}
+    .road-segment.e{left:50%}.road-segment.w{left:0}
+    .road-joint{position:absolute;z-index:2;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);border:2px solid #8b6841;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff0c3,#dfc28c 45%,#a17a49 100%);box-shadow:0 0 6px #f0ce8a88}
+    .terminal{position:absolute;z-index:3;left:50%;top:50%;display:grid;place-items:center;width:clamp(31px,7vw,48px);height:clamp(31px,7vw,48px);transform:translate(-50%,-50%);border:2px solid #f2d389;border-radius:12px;color:#fff3d3;background:linear-gradient(145deg,#a83d35,#57211f);box-shadow:0 0 0 3px #261711,0 4px 12px #0009;font-weight:900;font-size:clamp(.62rem,2.2vw,.9rem);text-shadow:0 1px 2px #30120f}
+    .terminal.is-destination{border-color:#fff1b0;color:#402711;background:linear-gradient(145deg,#fff0a9,#dfa936);box-shadow:0 0 0 3px #6d431b,0 0 16px #ffd765;text-shadow:none}
+    .terminal-name{position:absolute;z-index:4;left:50%;top:calc(50% + 29px);width:90px;transform:translateX(-50%);padding:2px 4px;border-radius:6px;color:#fff2d2;background:#1b1815e8;text-align:center;font-size:clamp(.53rem,1.8vw,.7rem);white-space:nowrap}
+    .terminal-name.is-bottom{top:auto;bottom:calc(50% + 29px)}
+    .start-marker{position:absolute;z-index:4;left:50%;top:50%;display:grid;place-items:center;width:26px;height:26px;transform:translate(-50%,-50%);border:2px dashed #cfe9be;border-radius:50%;color:#eaf5d9;background:#31432c;font-size:.65rem;font-weight:800}
+    .coin{position:absolute;z-index:7;left:5%;top:7.14%;display:grid;place-items:center;width:clamp(25px,4.4vw,34px);height:clamp(25px,4.4vw,34px);transform:translate(-50%,-50%);border:3px double #8d5a1c;border-radius:50%;color:#754311;background:radial-gradient(circle at 34% 28%,#fff2ad 0 12%,#efc75e 38%,#bd7d27 78%,#8e571e 100%);box-shadow:0 3px 6px #090807aa,inset 0 0 0 2px #f6dd88;font-family:serif;font-size:clamp(.5rem,1.7vw,.7rem);font-weight:900;transition:left .15s ease,top .15s ease}
+    .drop-hand{position:absolute;z-index:8;left:2%;top:1%;font-size:clamp(1.5rem,5vw,2.5rem);filter:drop-shadow(0 3px 2px #0008);pointer-events:none;animation:handDrop 1.4s ease-in forwards}
+    .drop-hand:after{content:"5円";position:absolute;left:60%;top:65%;display:grid;place-items:center;width:1.55em;height:1.55em;border:3px double #8d5a1c;border-radius:50%;color:#754311;background:#efc75e;font-size:.48em;font-weight:900;animation:coinFall 1.4s ease-in forwards}
+    @keyframes handDrop{0%,15%{opacity:1;transform:translate(0,0) rotate(-8deg)}70%{opacity:1;transform:translate(40px,56px) rotate(8deg)}100%{opacity:0;transform:translate(48px,65px) rotate(12deg)}}
+    @keyframes coinFall{0%,25%{transform:translateY(0)}100%{transform:translate(35px,75px) rotate(240deg)}}
+    .map-status{margin:0;color:#f4e5c5;text-align:left;font-size:.8rem;line-height:1.4}
+    .status-copy{margin:0}
+    .game-side{position:absolute;z-index:9;left:50%;bottom:12px;display:flex;align-items:center;gap:8px;width:max-content;max-width:90%;padding:8px 12px;transform:translateX(-50%);border:1px solid #d4b36e;border-radius:12px;background:#211914ed;box-shadow:0 4px 14px #0009}
+    .game-side[hidden]{display:none}
+    .controls{display:none;position:relative;z-index:1;grid-template-columns:repeat(3,42px);grid-template-rows:repeat(2,38px);justify-content:center;gap:4px;margin:4px auto}
+    .controls button{border:1px solid #c5a365;border-radius:10px;color:#fff1cb;background:linear-gradient(#735437,#49311f);box-shadow:0 3px #2a1b13;font-size:1.2rem;font-weight:900;touch-action:manipulation}
+    .controls button:active{transform:translateY(2px);box-shadow:0 1px #2a1b13}
+    .controls [data-move="up"]{grid-column:2;grid-row:1}.controls [data-move="left"]{grid-column:1;grid-row:2}.controls [data-move="down"]{grid-column:2;grid-row:2}.controls [data-move="right"]{grid-column:3;grid-row:2}
+    .footer-row{position:relative;z-index:1;display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:auto}
+    .footer-row[hidden]{display:none}
+    .action{padding:7px 11px;border:1px solid #d9bc79;border-radius:999px;color:#2b1a13;background:linear-gradient(#ffe49a,#ddb95f);font-size:.8rem;font-weight:850}
+    .action.secondary{color:#f7e8c6;background:#3c2b20}
+    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+    @media(max-width:620px){body{padding:6px}.heading{margin-bottom:5px}.eyebrow{font-size:.65rem}h1{font-size:1.08rem}.lead{font-size:.68rem}.chest{padding:6px;border-width:4px;border-radius:12px}.play-area{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:6px}.board-wrap{width:auto;height:calc(var(--available-height) - 150px);max-height:100%;aspect-ratio:7/11;padding:4px;transform:translateY(-6px)}.board{aspect-ratio:7/11}.road-segment.n,.road-segment.s{left:calc(50% - 4px);width:8px}.road-segment.e,.road-segment.w{top:calc(50% - 4px);height:8px}.road-joint{width:11px;height:11px}.terminal{width:clamp(22px,7vw,30px);height:clamp(22px,7vw,30px);border-radius:7px}.terminal.is-destination{box-shadow:0 0 0 2px #6d431b,0 0 12px #ffd765}.terminal-name{top:calc(50% + 20px);width:68px;font-size:.52rem}.start-marker{width:20px;height:20px;font-size:.5rem}.coin{width:24px;height:24px;font-size:.49rem;border-width:2px}.game-side{bottom:72px;gap:5px;padding:6px 8px}.map-status{font-size:.68rem}.controls{position:fixed;display:grid;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));grid-template-columns:42px 42px 42px;grid-template-rows:42px 42px;gap:3px;margin:0;padding:5px;border:1px solid rgba(212,179,110,.45);border-radius:13px;background:rgba(33,25,20,.1);box-shadow:0 4px 14px rgba(0,0,0,.15)}.controls button{border-color:rgba(197,163,101,.55);border-radius:8px;background:linear-gradient(rgba(115,84,55,.1),rgba(73,49,31,.1));box-shadow:0 3px rgba(42,27,19,.25);font-size:1rem;text-shadow:0 1px 2px #24180f}.footer-row{gap:4px}.action{padding:5px 7px;font-size:.62rem}.drop-hand{font-size:1.35rem}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <main class="game">
+    <header class="heading"><p class="eyebrow">網海神社・境內探索</p><h1>賽錢箱裡的封包道路</h1><p class="lead">沿著路由條件，把 5 円封包送到正確的收件處。</p></header>
+    <section class="chest" aria-label="賽錢箱內部道路遊戲">
+      <div class="play-area">
+        <div class="board-wrap"><div class="board" id="board" role="grid" aria-label="封包道路地圖" tabindex="0"><div class="drop-hand" id="drop-hand" aria-hidden="true">✋</div><span class="coin" id="coin" aria-label="5円封包">5円</span></div></div>
+          <div class="game-side" id="game-side" hidden>
+          <div class="map-status" role="status" aria-live="polite"><p class="status-copy" id="status-copy"></p></div>
+          <div class="footer-row" id="success-actions" hidden><button class="action" id="new-packet" type="button">再投一枚 5 円</button></div>
+        </div>
+      </div>
+    </section>
+      <div class="controls" aria-label="移動封包">
+        <button type="button" data-move="up" aria-label="向上移動">↑</button><button type="button" data-move="left" aria-label="向左移動">←</button><button type="button" data-move="down" aria-label="向下移動">↓</button><button type="button" data-move="right" aria-label="向右移動">→</button>
+      </div>
+    <p class="sr-only" id="live-position" aria-live="polite"></p>
+  </main>
+  <script>
+    (() => {
+      const portrait = window.matchMedia('(max-width: 620px)').matches;
+      const WIDTH = portrait ? 7 : 11;
+      const HEIGHT = portrait ? 11 : 7;
+      const DIRECTIONS = [
+        { key: 'up', label: '上', arrow: '↑', dx: 0, dy: -1, opposite: 'down' },
+        { key: 'right', label: '右', arrow: '→', dx: 1, dy: 0, opposite: 'left' },
+        { key: 'down', label: '下', arrow: '↓', dx: 0, dy: 1, opposite: 'up' },
+        { key: 'left', label: '左', arrow: '←', dx: -1, dy: 0, opposite: 'right' },
+      ];
+      const DESTINATIONS = [
+        { id: 'amulet', name: '御守櫃', x: WIDTH - 1, y: 0, icon: '守' },
+        { id: 'office', name: '受付所', x: WIDTH - 1, y: HEIGHT - 1, icon: '受' },
+        { id: 'prayer', name: '祈願信箱', x: 0, y: HEIGHT - 1, icon: '願' },
+      ];
+      const board = document.querySelector('#board');
+      const statusNode = document.querySelector('#status-copy');
+      const gameSide = document.querySelector('#game-side');
+      const successActions = document.querySelector('#success-actions');
+      const livePosition = document.querySelector('#live-position');
+      const hand = document.querySelector('#drop-hand');
+      const coin = document.querySelector('#coin');
+      let maze = [];
+      let current = { x: 0, y: 0 };
+      let destination = DESTINATIONS[0];
+      let locked = false;
+
+      function key(x, y) { return `${x},${y}`; }
+      function randomItem(items) { return items[Math.floor(Math.random() * items.length)]; }
+
+      function generateMaze() {
+        const cells = Array.from({ length: HEIGHT }, (_, y) => Array.from({ length: WIDTH }, (_, x) => ({ x, y, links: new Set(), visited: false })));
+        const stack = [cells[0][0]];
+        cells[0][0].visited = true;
+        while (stack.length) {
+          const cell = stack[stack.length - 1];
+          const options = DIRECTIONS.map((direction) => ({ direction, x: cell.x + direction.dx, y: cell.y + direction.dy }))
+            .filter((option) => option.x >= 0 && option.x < WIDTH && option.y >= 0 && option.y < HEIGHT && !cells[option.y][option.x].visited);
+          if (!options.length) { stack.pop(); continue; }
+          const { direction, x, y } = randomItem(options);
+          const next = cells[y][x];
+          cell.links.add(direction.key);
+          next.links.add(direction.opposite);
+          next.visited = true;
+          stack.push(next);
+        }
+        return cells;
+      }
+
+      function shortestDirections(goal) {
+        const distances = new Map([[key(goal.x, goal.y), 0]]);
+        const queue = [{ x: goal.x, y: goal.y }];
+        for (let cursor = 0; cursor < queue.length; cursor += 1) {
+          const cell = queue[cursor];
+          for (const direction of DIRECTIONS) {
+            if (!maze[cell.y][cell.x].links.has(direction.key)) continue;
+            const x = cell.x + direction.dx;
+            const y = cell.y + direction.dy;
+            const cellKey = key(x, y);
+            if (distances.has(cellKey)) continue;
+            distances.set(cellKey, distances.get(key(cell.x, cell.y)) + 1);
+            queue.push({ x, y });
+          }
+        }
+        return distances;
+      }
+
+      function directionToward(cell, goal, distances) {
+        const currentDistance = distances.get(key(cell.x, cell.y));
+        const options = DIRECTIONS.filter((direction) => {
+          if (!maze[cell.y][cell.x].links.has(direction.key)) return false;
+          const nextKey = key(cell.x + direction.dx, cell.y + direction.dy);
+          return distances.get(nextKey) === currentDistance - 1;
+        });
+        return options[0] ?? null;
+      }
+
+      function drawMaze() {
+        board.replaceChildren();
+        board.style.gridTemplateColumns = `repeat(${WIDTH}, minmax(0, 1fr))`;
+        board.style.gridTemplateRows = `repeat(${HEIGHT}, minmax(0, 1fr))`;
+        board.style.aspectRatio = `${WIDTH} / ${HEIGHT}`;
+        board.append(hand, coin);
+        const goalByCell = new Map(DESTINATIONS.map((goal) => [key(goal.x, goal.y), goal]));
+        for (let y = 0; y < HEIGHT; y += 1) {
+          for (let x = 0; x < WIDTH; x += 1) {
+            const cell = maze[y][x];
+            const element = document.createElement('div');
+            element.className = 'road-cell';
+            const goal = goalByCell.get(key(x, y));
+            if (goal?.id === destination.id) element.classList.add('is-destination');
+            element.setAttribute('role', 'gridcell');
+            element.setAttribute('aria-label', `道路位置，${x + 1} 欄 ${y + 1} 列`);
+            for (const direction of DIRECTIONS) {
+              if (!cell.links.has(direction.key)) continue;
+              const segment = document.createElement('span');
+              segment.className = `road-segment ${direction.key === 'up' ? 'n' : direction.key === 'down' ? 's' : direction.key === 'left' ? 'w' : 'e'}`;
+              element.append(segment);
+            }
+            const joint = document.createElement('span');
+            joint.className = 'road-joint';
+            element.append(joint);
+            if (goal) {
+              const terminal = document.createElement('span');
+              terminal.className = 'terminal';
+              if (goal.id === destination.id) terminal.classList.add('is-destination');
+              terminal.textContent = goal.icon;
+              const label = document.createElement('span');
+              label.className = 'terminal-name';
+              if (goal.y === HEIGHT - 1) label.classList.add('is-bottom');
+              label.textContent = goal.name;
+              element.append(terminal, label);
+            }
+            if (x === 0 && y === 0) {
+              const start = document.createElement('span');
+              start.className = 'start-marker';
+              start.textContent = '入口';
+              element.append(start);
+            }
+            board.append(element);
+          }
+        }
+        positionCoin();
+      }
+
+      function positionCoin() {
+        coin.style.left = `${((current.x + 0.5) / WIDTH) * 100}%`;
+        coin.style.top = `${((current.y + 0.5) / HEIGHT) * 100}%`;
+      }
+
+      function updateCoinPosition() {
+        positionCoin();
+        livePosition.textContent = `封包目前在第 ${current.y + 1} 列、第 ${current.x + 1} 欄。`;
+        const arrived = DESTINATIONS.find((goal) => goal.x === current.x && goal.y === current.y);
+        if (arrived) {
+          if (arrived.id === destination.id) {
+            locked = true;
+            statusNode.textContent = `送達成功！封包沿著道路抵達「${arrived.name}」。`;
+            gameSide.hidden = false;
+            successActions.hidden = false;
+          } else {
+            statusNode.textContent = `這裡是「${arrived.name}」，不是封包的目的地。請沿著道路繼續尋找。`;
+            gameSide.hidden = false;
+            successActions.hidden = true;
+          }
+        } else {
+          statusNode.textContent = '';
+          gameSide.hidden = true;
+        }
+      }
+
+      function move(directionKey) {
+        if (locked) return;
+        const direction = DIRECTIONS.find((item) => item.key === directionKey);
+        if (!direction || !maze[current.y][current.x].links.has(direction.key)) {
+          return;
+        }
+        current = { x: current.x + direction.dx, y: current.y + direction.dy };
+        updateCoinPosition();
+      }
+
+      function newPacket() {
+        maze = generateMaze();
+        current = { x: 0, y: 0 };
+        destination = randomItem(DESTINATIONS);
+        locked = false;
+        gameSide.hidden = true;
+        successActions.hidden = true;
+        statusNode.textContent = '';
+        drawMaze();
+        if (hand) {
+          hand.style.animation = 'none';
+          void hand.offsetHeight;
+          hand.style.animation = '';
+        }
+      }
+
+      document.addEventListener('keydown', (event) => {
+        const keyToDirection = { ArrowUp: 'up', ArrowRight: 'right', ArrowDown: 'down', ArrowLeft: 'left' };
+        if (!keyToDirection[event.key]) return;
+        event.preventDefault();
+        move(keyToDirection[event.key]);
+      });
+      document.querySelectorAll('[data-move]').forEach((button) => button.addEventListener('click', () => move(button.dataset.move)));
+      document.querySelector('#new-packet').addEventListener('click', newPacket);
+      function reportEmbedHeight() {
+        const height = Math.ceil(Math.max(document.documentElement.scrollHeight, document.body.scrollHeight));
+        window.parent.postMessage({ type: 'shrine-saisen:resize', height }, '*');
+      }
+      let heightReportScheduled = false;
+      function scheduleEmbedHeight() {
+        if (heightReportScheduled) return;
+        heightReportScheduled = true;
+        requestAnimationFrame(() => { heightReportScheduled = false; reportEmbedHeight(); });
+      }
+      const resizeObserver = new ResizeObserver(scheduleEmbedHeight);
+      resizeObserver.observe(document.documentElement);
+      resizeObserver.observe(document.body);
+      window.addEventListener('load', scheduleEmbedHeight, { once: true });
+      window.addEventListener('resize', scheduleEmbedHeight);
+      window.addEventListener('message', (event) => {
+        if (event.source !== window.parent || event.data?.type !== 'shrine-saisen:measure') return;
+        if (Number.isFinite(event.data.height)) {
+          document.documentElement.style.setProperty('--available-height', `${Math.max(300, event.data.height)}px`);
+        }
+        scheduleEmbedHeight();
+      });
+      scheduleEmbedHeight();
+      newPacket();
+    })();
+  </script>
+</body>
+</html>

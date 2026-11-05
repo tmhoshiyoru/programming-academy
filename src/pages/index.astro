@@ -13,7 +13,10 @@ const courses = visibleCourses(await getCollection('courseSettings'));
     <BrickWordWall />
     <section class="home-courses">
       <h2>從課程開始</h2>
-      {courses.length ? <ul class="course-cards">{courses.map((course) => <li><a href={siteUrl(`/courses/${courseFolderId(course.id)}/`)}><strong>{course.data.title}</strong><br /><span>開啟課程</span></a></li>)}</ul> : <p>新增課程設定後，課程會自動出現在這裡。</p>}
+      <ul class="course-cards">
+        {courses.map((course) => <li><a href={siteUrl(`/courses/${courseFolderId(course.id)}/`)}><strong>{course.data.title}</strong><br /><span>開啟課程</span></a></li>)}
+        <li><a href={siteUrl('/tools/')}><strong>小工具</strong><br /><span>開啟所有小工具</span></a></li>
+      </ul>
     </section>
     </div>
 </SiteLayout>

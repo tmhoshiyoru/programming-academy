@@ -1,0 +1,342 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { siteUrl } from '../../lib/site-url';
+---
+
+<SiteLayout title="網海神社" description="沿著海邊參道走進網海神社，探索各個神社地標。" hideShrineLink>
+  <div class="shrine-page">
+    <div class="shrine-wrap">
+      <header class="shrine-mast">
+        <p class="shrine-eyebrow">網路平安祈願所</p>
+        <h1>網海神社</h1>
+        <p class="shrine-subtitle">循著潮聲前行，願你在網路世界平安自在。</p>
+        <div class="gold-divider" aria-hidden="true"><span>✦</span></div>
+      </header>
+
+      <section class="shrine-map-card" aria-labelledby="map-heading">
+        <div class="map-caption">
+          <div>
+            <p class="map-kicker">SHRINE GROUNDS</p>
+            <h2 id="map-heading">境內地圖</h2>
+          </div>
+          <p class="map-hint">點選地標，看看神社裡有什麼。</p>
+        </div>
+
+        <div class="shrine-map" id="shrine-map" aria-label="網海神社境內地圖">
+          <div class="sea" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="shoreline" aria-hidden="true"></div>
+          <div class="forest forest-left" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="forest forest-right" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="approach-path" aria-hidden="true"></div>
+          <div class="cross-path cross-path-one" aria-hidden="true"></div>
+          <div class="cross-path cross-path-two" aria-hidden="true"></div>
+          <div class="garden garden-left" aria-hidden="true"></div>
+          <div class="garden garden-right" aria-hidden="true"></div>
+          <div class="stone-lantern lantern-one" aria-hidden="true"><i></i></div>
+          <div class="stone-lantern lantern-two" aria-hidden="true"><i></i></div>
+          <div class="stone-lantern lantern-three" aria-hidden="true"><i></i></div>
+          <div class="map-grass grass-one" aria-hidden="true">✿</div>
+          <div class="map-grass grass-two" aria-hidden="true">✿</div>
+          <div class="map-grass grass-three" aria-hidden="true">✿</div>
+
+          <button class="map-place place-torii" type="button" data-place="torii" aria-label="鳥居：點開介紹">
+            <span class="torii-art" aria-hidden="true">
+              <svg viewBox="0 0 120 112" focusable="false"><path d="M8 18 Q60 27 112 18 L106 29 Q60 36 14 29Z"/><path d="M18 37h84v10H18zM27 43h10v62H27zM83 43h10v62H83zM20 100h80v9H20z"/><path d="M15 30h90v5H15z"/></svg>
+            </span>
+            <span class="place-label">鳥居</span>
+          </button>
+
+          <button class="map-place place-chōzuya" type="button" data-place="chozuya" aria-label="手水舍：點開介紹">
+            <span class="pavilion-art chozu-art" aria-hidden="true"><i class="roof"></i><i class="post post-a"></i><i class="post post-b"></i><i class="post post-c"></i><i class="post post-d"></i><i class="basin"></i><i class="water"></i></span>
+            <span class="place-label">手水舍</span>
+          </button>
+
+          <button class="map-place place-haiden" type="button" data-place="haiden" aria-label="拜殿：點開介紹">
+            <span class="shrine-building" aria-hidden="true"><i class="building-roof"></i><i class="building-body"></i><i class="building-door"></i><i class="bell-rope"></i></span>
+            <span class="place-label">拜殿</span>
+          </button>
+
+          <button class="map-place place-offertory" type="button" data-place="offertory" aria-label="賽錢箱：點開介紹">
+            <svg class="offertory-art" viewBox="0 0 100 70" aria-hidden="true" focusable="false"><path d="M12 22 50 6l38 16-5 8H17z" fill="#302a26" stroke="#d5b879" stroke-width="2"/><path d="M18 29h64v32H18z" fill="#9a4a2e" stroke="#d1a45e" stroke-width="3"/><path d="M24 35h52v22H24z" fill="#783a29"/><path d="M39 31h22v4H39z" fill="#211f1c"/><path d="M9 63h82v5H9z" fill="#d1ad68"/></svg>
+            <span class="place-label">賽錢箱</span>
+          </button>
+
+          <button class="map-place place-office" type="button" data-place="office" aria-label="受付所：點開介紹">
+            <span class="pavilion-art office-art" aria-hidden="true"><i class="roof"></i><i class="post post-a"></i><i class="post post-b"></i><i class="counter"></i><i class="counter-screen"></i><i class="shide"></i></span>
+            <span class="place-label">受付所</span>
+          </button>
+
+          <button class="map-place place-omikuji" type="button" data-place="omikuji" aria-label="御神籤：抽一支籤">
+            <span class="omikuji-stand" aria-hidden="true"><i class="stand-roof"></i><i class="stand-body"></i><i class="fortune-paper"></i><i class="paper-mark"></i></span>
+            <span class="place-label">御神籤</span>
+          </button>
+
+          <span class="map-direction" aria-label="北方">北 <b>↑</b></span>
+        </div>
+        <p class="map-note" aria-live="polite" id="map-note">沿著參道走進網海神社，在樹影與潮聲之間停下腳步，讓心情慢慢安定。</p>
+        <span class="sr-only" id="map-click-status" aria-live="polite"></span>
+      </section>
+
+      <footer class="shrine-footer"><span>網海神社</span><span>潮聲與燈火，伴你平安歸途</span></footer>
+    </div>
+
+    <dialog class="landmark-dialog" id="landmark-dialog" aria-labelledby="dialog-title">
+      <button class="dialog-close" type="button" aria-label="關閉視窗">×</button>
+      <p class="dialog-overline">網海神社・境內地標</p>
+      <h2 id="dialog-title"></h2>
+      <div class="dialog-copy" id="dialog-copy"></div>
+      <iframe class="landmark-frame" id="omikuji-frame" src={siteUrl('/shrine/omikuji.html')} title="網海神社御神籤互動頁面" sandbox="allow-scripts" hidden></iframe>
+      <iframe class="landmark-frame" id="offertory-frame" src={siteUrl('/shrine/saisen-routing.html')} title="賽錢箱內的封包道路互動遊戲" sandbox="allow-scripts" hidden></iframe>
+      <iframe class="landmark-frame" id="haiden-frame" src={siteUrl('/shrine/haiden-memory.html')} title="拜殿參拜節奏遊戲" sandbox="allow-scripts" hidden></iframe>
+      <iframe class="landmark-frame" id="torii-frame" src={siteUrl('/shrine/torii-maze.html')} title="鳥居迷宮遊戲" sandbox="allow-scripts" hidden></iframe>
+      <iframe class="landmark-frame" id="office-frame" data-src={siteUrl('/shrine/office-memory.html')} title="受付所記憶翻牌遊戲" sandbox="allow-scripts allow-same-origin" hidden></iframe>
+      <iframe class="landmark-frame" id="chozuya-frame" data-src={siteUrl('/shrine/chozuya-water.html')} title="手水舍水面互動體驗" sandbox="allow-scripts" hidden></iframe>
+    </dialog>
+  </div>
+</SiteLayout>
+
+<script>
+  const map = document.querySelector<HTMLElement>('#shrine-map');
+  const dialog = document.querySelector<HTMLDialogElement>('#landmark-dialog');
+  const dialogTitle = document.querySelector<HTMLElement>('#dialog-title');
+  const dialogCopy = document.querySelector<HTMLElement>('#dialog-copy');
+  const mapNote = document.querySelector<HTMLElement>('#map-note');
+  const clickStatus = document.querySelector<HTMLElement>('#map-click-status');
+  const omikujiFrame = document.querySelector<HTMLIFrameElement>('#omikuji-frame');
+  const offertoryFrame = document.querySelector<HTMLIFrameElement>('#offertory-frame');
+  const haidenFrame = document.querySelector<HTMLIFrameElement>('#haiden-frame');
+  const toriiFrame = document.querySelector<HTMLIFrameElement>('#torii-frame');
+  const officeFrame = document.querySelector<HTMLIFrameElement>('#office-frame');
+  const chozuyaFrame = document.querySelector<HTMLIFrameElement>('#chozuya-frame');
+  let activeLandmark = '';
+  let offertoryFrameHeight = 680;
+  const shrineIntroduction = '沿著參道走進網海神社，在樹影與潮聲之間停下腳步，讓心情慢慢安定。';
+  const landmarks: Record<string, { title: string; copy: string; note: string }> = {
+    torii: { title: '鳥居', copy: '', note: '鳥居的朱紅柱與橫木，藏著一條通往出口的迷宮。' },
+    chozuya: { title: '手水舍', copy: '', note: '石鉢裡的清水靜靜流動，偶爾漾開一圈漣漪。' },
+    haiden: { title: '拜殿', copy: '選一個心願，跟著節奏練習一般參拜作法：二拜、二拍手、合掌默禱，再一拜。', note: '拜殿前燈火安穩，正適合停下來整理心願。' },
+    offertory: { title: '賽錢箱', copy: '賽錢箱設在拜殿前方。若想參拜，可以在這裡停下腳步，安靜地整理心情。', note: '賽錢箱位於通往拜殿的參道上。' },
+    office: { title: '受付所', copy: '風鈴輕響，色彩各異的御守靜靜排列，等待與你相遇。', note: '受付所裡的御守各有紋樣，風鈴聲中，像是在等待一段相合的緣分。' },
+    omikuji: { title: '御神籤', copy: '搖一搖籤筒，抽出今天的提醒。', note: '籤筒輕輕搖晃，等待一段與你相遇的籤詩。' },
+  };
+  const closeButton = document.querySelector<HTMLButtonElement>('.dialog-close');
+
+  window.addEventListener('message', (event: MessageEvent) => {
+    const message = event.data as { type?: unknown; height?: unknown } | null;
+    if (officeFrame?.contentWindow === event.source && message?.type === 'shrine-office:resize' && typeof message.height === 'number' && Number.isFinite(message.height)) {
+      officeFrame.style.height = `${Math.max(280, Math.min(Math.ceil(message.height), 100000))}px`;
+      return;
+    }
+    if (chozuyaFrame?.contentWindow === event.source && message?.type === 'shrine-chozuya:resize' && typeof message.height === 'number' && Number.isFinite(message.height)) {
+      chozuyaFrame.style.height = `${Math.max(280, Math.min(Math.ceil(message.height), 100000))}px`;
+      return;
+    }
+    const activeFrame = [omikujiFrame, offertoryFrame].find((frame) => frame?.contentWindow === event.source);
+    const expectedType = activeFrame === omikujiFrame ? 'shrine-omikuji:resize' : activeFrame === offertoryFrame ? 'shrine-saisen:resize' : null;
+    if (!activeFrame || !message || message.type !== expectedType || typeof message.height !== 'number' || !Number.isFinite(message.height)) return;
+    activeFrame.style.height = activeFrame === offertoryFrame
+      ? `${offertoryFrameHeight}px`
+      : `${Math.max(480, Math.min(Math.ceil(message.height), 100000))}px`;
+  });
+
+  map?.addEventListener('pointerover', (event) => {
+    const target = event.target as HTMLElement;
+    const landmark = target.closest<HTMLButtonElement>('[data-place]');
+    const place = landmark?.dataset.place;
+    if (place && mapNote) mapNote.textContent = landmarks[place]?.note ?? shrineIntroduction;
+  });
+
+  map?.addEventListener('pointerleave', () => {
+    if (mapNote) mapNote.textContent = shrineIntroduction;
+  });
+
+  function openLandmark(place: string) {
+    const data = landmarks[place];
+    if (!data || !dialog || !dialogTitle || !dialogCopy || !mapNote) return;
+    dialogTitle.textContent = data.title;
+    dialogCopy.textContent = data.copy;
+    mapNote.textContent = data.note;
+    const frame = place === 'omikuji' ? omikujiFrame : place === 'offertory' ? offertoryFrame : place === 'haiden' ? haidenFrame : place === 'torii' ? toriiFrame : place === 'office' ? officeFrame : place === 'chozuya' ? chozuyaFrame : null;
+    dialogCopy.hidden = Boolean(frame);
+    if (omikujiFrame) omikujiFrame.hidden = frame !== omikujiFrame;
+    if (offertoryFrame) offertoryFrame.hidden = frame !== offertoryFrame;
+    if (haidenFrame) haidenFrame.hidden = frame !== haidenFrame;
+    if (toriiFrame) toriiFrame.hidden = frame !== toriiFrame;
+    if (officeFrame) officeFrame.hidden = frame !== officeFrame;
+    if (chozuyaFrame) chozuyaFrame.hidden = frame !== chozuyaFrame;
+    dialog.showModal();
+    if (frame) {
+      activeLandmark = place;
+      if (place === 'office' && !frame.hasAttribute('src')) {
+        frame.src = frame.dataset.src ?? '/shrine/office-memory.html';
+      }
+      if (place === 'chozuya' && !frame.hasAttribute('src')) {
+        frame.src = frame.dataset.src ?? '/shrine/chozuya-water.html';
+      }
+      const availableHeight = Math.max(340, Math.floor(window.innerHeight * 0.92 - 130));
+      if (place === 'offertory') {
+        offertoryFrameHeight = availableHeight;
+        frame.style.height = `${availableHeight}px`;
+      }
+      const measureType = place === 'omikuji' ? 'shrine-omikuji:measure' : place === 'offertory' ? 'shrine-saisen:measure' : null;
+      if (measureType) requestAnimationFrame(() => frame.contentWindow?.postMessage({ type: measureType, height: availableHeight }, '*'));
+    } else {
+      activeLandmark = '';
+    }
+  }
+
+  window.addEventListener('resize', () => {
+    if (activeLandmark !== 'offertory' || !dialog?.open || !offertoryFrame) return;
+    offertoryFrameHeight = Math.max(340, Math.floor(window.innerHeight * 0.92 - 130));
+    offertoryFrame.style.height = `${offertoryFrameHeight}px`;
+    offertoryFrame.contentWindow?.postMessage({ type: 'shrine-saisen:measure', height: offertoryFrameHeight }, '*');
+  });
+
+  map?.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+    const landmark = target.closest<HTMLButtonElement>('[data-place]');
+    const bounds = map.getBoundingClientRect();
+    const x = Math.round(((event.clientX - bounds.left) / bounds.width) * 100);
+    const y = Math.round(((event.clientY - bounds.top) / bounds.height) * 100);
+    if (clickStatus) clickStatus.textContent = landmark
+      ? `點擊地標：${landmarks[landmark.dataset.place ?? '']?.title ?? '未知地標'}`
+      : `點擊地圖位置：橫向 ${x}%，縱向 ${y}%。這裡目前沒有互動地標。`;
+    map.dataset.lastClick = `${x},${y}`;
+    if (landmark?.dataset.place) openLandmark(landmark.dataset.place);
+  });
+
+  closeButton?.addEventListener('click', () => dialog?.close());
+  dialog?.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+</script>
+
+<style>
+  .shrine-page { --night: #101f2a; --sea: #183946; --paper: #fcf7ec; --ink: #30291f; --verm: #a32e2b; --gold: #b69a68; min-height: calc(100vh - 8rem); margin: -2.25rem calc((min(1440px, 100vw - 2rem) - 100vw) / 2) 0; padding: 1px 1rem 2rem; color: #f8f2e4; background: radial-gradient(ellipse at 50% 0%,#294554 0%,#142b37 43%,#0d1b25 100%); font-family: "Noto Serif TC", "Source Han Serif TC", "PMingLiU", "新細明體", serif; }
+  .shrine-wrap { width: min(1120px,100%); margin: 0 auto; padding: 1.3rem 1rem 1.5rem; }
+  .shrine-mast { text-align: center; padding: 1rem 0 .25rem; }
+  .shrine-eyebrow { margin: 0; color: #d2b985; font-size: .72rem; letter-spacing: .45em; }
+  .shrine-mast h1 { margin: .35rem 0 0; color: #f7ead0; font-size: clamp(2.4rem,7vw,4.15rem); font-weight: 600; letter-spacing: .25em; text-indent: .25em; text-shadow: 0 5px 18px #07151d; }
+  .shrine-subtitle { margin: .25rem 0; color: #c4d1cf; font-size: .85rem; letter-spacing: .12em; }
+  .gold-divider { display: flex; align-items: center; gap: .7rem; width: min(30rem,80%); margin: 1.05rem auto 1.35rem; color: #c5a76d; }
+  .gold-divider::before,.gold-divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg,transparent,#a68c5e); }
+  .gold-divider::after { transform: scaleX(-1); }
+  .gold-divider span { font-size: .75rem; }
+  .shrine-map-card { overflow: hidden; border: 1px solid #71878080; border-radius: 1.25rem; background: #102631b8; box-shadow: 0 20px 60px #07152080, inset 0 0 40px #071d2790; }
+  .map-caption { display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding: .95rem 1.15rem .8rem; border-bottom: 1px solid #b69a6845; }
+  .map-kicker { margin: 0; color: #c6aa73; font-size: .58rem; letter-spacing: .2em; }
+  .map-caption h2 { margin: 0; color: #f1e4c9; font-size: 1.1rem; letter-spacing: .1em; }
+  .map-hint { margin: 0; color: #bdc9c3; font-size: .75rem; }
+  .shrine-map { position: relative; isolation: isolate; height: clamp(34rem,70vw,45rem); overflow: hidden; background: linear-gradient(180deg,#123442 0%,#244c4c 12%,#3f634f 30%,#526d4b 75%,#3e5c43 100%); }
+  .shrine-map::before { content: ''; position: absolute; inset: 0; z-index: -1; opacity: .28; background-image: radial-gradient(#e0d5ad 0.6px,transparent .8px),radial-gradient(#0e242b 0.55px,transparent .8px); background-size: 17px 19px,23px 26px; background-position: 0 0,8px 11px; }
+  .sea { position: absolute; inset: 0 0 auto; height: 19%; overflow: hidden; background: linear-gradient(180deg,#143440,#22515a 78%,#456958); }
+  .sea i { position: absolute; left: -8%; width: 116%; height: 3.6rem; border-top: 2px solid #c5d6c66b; border-radius: 50%; transform: rotate(-2deg); }
+  .sea i:nth-child(1) { top: 34%; }
+  .sea i:nth-child(2) { top: 57%; left: -2%; opacity: .65; transform: rotate(2deg); }
+  .sea i:nth-child(3) { top: 77%; left: -15%; opacity: .42; }
+  .shoreline { position: absolute; top: 14%; left: -5%; width: 110%; height: 12%; border-radius: 50%; background: linear-gradient(180deg,#c1ae7a,#d0c297 22%,#708253 24%,#5c744c 100%); transform: rotate(-1deg); box-shadow: 0 5px 12px #102c28a8; }
+  .approach-path { position: absolute; left: 50%; top: 20%; bottom: -4%; width: min(36%,21rem); transform: translateX(-50%); background: repeating-linear-gradient(0deg,#bdb39a 0 1px,#a9a18b 1px 3px,#c6bda2 3px 13px,#b9ae92 13px 15px); clip-path: polygon(35% 0,65% 0,100% 100%,0 100%); box-shadow: inset 0 0 25px #554d3b66; }
+  .approach-path::after { content: ''; position: absolute; inset: 0 45% 0; background: repeating-linear-gradient(0deg,#e9ddbd 0 2px,transparent 2px 21px); opacity: .45; }
+  .cross-path { position: absolute; z-index: 0; left: 7%; right: 7%; height: 2.25rem; border-block: 2px solid #766c58; background: repeating-linear-gradient(90deg,#c5b99d 0 2px,#b2a78e 2px 18px,#d0c3a6 18px 21px); box-shadow: 0 4px 8px #172c2260; }
+  .cross-path-one { top: 53%; }
+  .cross-path-two { top: 77%; left: 15%; right: 15%; }
+  .forest { position: absolute; z-index: 1; top: 24%; bottom: 2%; width: 24%; display: flex; align-items: flex-start; justify-content: space-around; pointer-events: none; }
+  .forest-left { left: 0; }
+  .forest-right { right: 0; transform: scaleX(-1); }
+  .forest i { position: relative; display: block; width: clamp(2.2rem,6vw,4.8rem); height: clamp(6rem,19vw,13rem); margin-top: calc(var(--tree-offset,0) * 1rem); border-radius: 50% 50% 12% 12%; background: linear-gradient(90deg,#1e453d,#315e48 55%,#1b4039); clip-path: polygon(50% 0,92% 39%,73% 37%,100% 68%,73% 65%,88% 100%,12% 100%,27% 65%,0 68%,27% 37%,8% 39%); filter: drop-shadow(3px 7px 5px #10271f88); }
+  .forest i:nth-child(2n) { margin-top: 3rem; transform: scale(.8); background: linear-gradient(90deg,#244d40,#3b684b,#21453b); }
+  .forest i:nth-child(3n) { margin-top: 1.6rem; transform: scale(.65); }
+  .garden { position: absolute; z-index: 2; width: 10%; height: 12%; border: 2px solid #344c38; border-radius: 50%; background: radial-gradient(ellipse,#769250 0 24%,#a77d50 25% 37%,transparent 39%); opacity: .8; }
+  .garden-left { top: 43%; left: 9%; }
+  .garden-right { top: 68%; right: 9%; transform: scale(.8); }
+  .stone-lantern { position: absolute; z-index: 3; width: 1.5rem; height: 2.5rem; filter: drop-shadow(2px 4px 3px #17271e88); }
+  .stone-lantern::before { content: ''; position: absolute; left: -.3rem; top: .15rem; width: 2.1rem; height: .42rem; background: #857d68; clip-path: polygon(12% 0,88% 0,100% 100%,0 100%); }
+  .stone-lantern::after { content: ''; position: absolute; left: .05rem; top: .52rem; width: 1.4rem; height: 1.05rem; background: linear-gradient(90deg,#7b7667,#aaa18a,#756d60); clip-path: polygon(15% 0,85% 0,100% 25%,100% 75%,85% 100%,15% 100%,0 75%,0 25%); }
+  .stone-lantern i { position: absolute; z-index: 1; left: .48rem; top: .76rem; width: .5rem; height: .45rem; background: #ffc875; filter: blur(3px); }
+  .lantern-one { left: 37%; top: 41%; }
+  .lantern-two { right: 36%; top: 63%; transform: scale(.8); }
+  .lantern-three { left: 27%; top: 72%; transform: scale(.72); }
+  .map-grass { position: absolute; z-index: 2; color: #e6c880; opacity: .8; font-size: 1.4rem; text-shadow: 0 2px 5px #244331; }
+  .grass-one { left: 15%; top: 66%; }
+  .grass-two { right: 17%; top: 36%; font-size: 1rem; }
+  .grass-three { right: 23%; bottom: 4%; }
+  .map-place { position: absolute; z-index: 4; display: flex; flex-direction: column; align-items: center; gap: .15rem; padding: .25rem; color: #fcf3df; border: 0; border-radius: .6rem; background: #14282126; cursor: pointer; transition: transform .18s ease, background .18s ease, filter .18s ease; }
+  .map-place:hover,.map-place:focus-visible { z-index: 6; background: #10251ed9; transform: translateY(-4px) scale(1.04); filter: drop-shadow(0 5px 8px #07131aa0); }
+  .place-label { padding: .1rem .42rem; color: #fff4de; border: 1px solid #dfc58c99; border-radius: 999px; background: #152c2bd9; font-size: .72rem; font-weight: 750; letter-spacing: .08em; white-space: nowrap; text-shadow: 0 1px 3px #000; }
+  .place-torii { top: auto; bottom: 3%; left: 50%; transform: translateX(-50%); }
+  .place-torii:hover,.place-torii:focus-visible { transform: translate(-50%,-4px) scale(1.04); }
+  .torii-art { display: block; width: clamp(5rem,14vw,8.25rem); height: clamp(4.7rem,13vw,7.7rem); filter: drop-shadow(0 5px 6px #111b1c88); }
+  .torii-art svg { width: 100%; height: 100%; overflow: visible; fill: #a8332c; stroke: #dfb965; stroke-width: 1.5; stroke-linejoin: round; }
+  .place-chōzuya { top: 43%; left: 12%; }
+  .place-office { top: 43%; right: 12%; }
+  .place-haiden { top: 10%; left: 50%; transform: translateX(-50%); }
+  .place-haiden:hover,.place-haiden:focus-visible { transform: translate(-50%,-4px) scale(1.04); }
+  .place-offertory { top: 34%; left: 50%; transform: translateX(-50%); }
+  .place-offertory:hover,.place-offertory:focus-visible { transform: translate(-50%,-4px) scale(1.04); }
+  .offertory-art { display: block; width: 5.5rem; height: 3.85rem; filter: drop-shadow(0 5px 6px #10251f99); }
+  .place-omikuji { left: 50%; top: 57%; transform: translateX(-50%); }
+  .place-omikuji:hover,.place-omikuji:focus-visible { transform: translate(-50%,-4px) scale(1.04); }
+  .pavilion-art { position: relative; display: block; width: 6.5rem; height: 4.7rem; filter: drop-shadow(0 4px 5px #162a23a8); }
+  .pavilion-art i { position: absolute; display: block; }
+  .pavilion-art .roof { left: 0; top: .15rem; width: 6.5rem; height: 1.4rem; background: linear-gradient(#514237,#342f2a); clip-path: polygon(4% 40%,20% 40%,20% 23%,50% 0,80% 23%,80% 40%,96% 40%,100% 72%,0 72%); }
+  .chozu-art .roof { background: linear-gradient(#514237,#39332a); }
+  .pavilion-art .post { top: 1.15rem; width: .28rem; height: 2.6rem; background: #8e392b; }
+  .pavilion-art .post-a { left: .55rem; }.pavilion-art .post-b { right: .55rem; }
+  .chozu-art .post-c { left: 1.65rem; }.chozu-art .post-d { right: 1.65rem; }
+  .pavilion-art .basin { left: .8rem; right: .8rem; bottom: .18rem; height: 1.05rem; border: 2px solid #777567; border-radius: .28rem .28rem .65rem .65rem; background: linear-gradient(#8ca5a0 0 30%,#485b57 32%); }
+  .pavilion-art .water { left: 1.45rem; right: 1.45rem; bottom: .64rem; height: .12rem; border-radius: 50%; background: #b8d6cf; }
+  .office-art .roof { background: linear-gradient(#352c28,#191f20); }
+  .office-art .counter { left: .45rem; right: .45rem; bottom: .28rem; height: 1.35rem; border: 2px solid #4d3025; background: linear-gradient(#9d4931 0 20%,#6f382b 21%); }
+  .office-art .counter-screen { left: 2.45rem; top: 1.25rem; width: 1.6rem; height: .75rem; border: 2px solid #936a48; background: #f2dfb8; }
+  .office-art .shide { left: .65rem; right: .65rem; top: 1.12rem; height: .17rem; background: #eee0c2; }
+  .shrine-building { position: relative; width: 9.5rem; height: 7rem; filter: drop-shadow(0 6px 8px #10251f99); }
+  .shrine-building i { position: absolute; display: block; }
+  .building-roof { top: .2rem; left: -.35rem; width: 10.2rem; height: 2.7rem; background: linear-gradient(#3c3029,#241f1e); clip-path: polygon(4% 24%,24% 24%,26% 11%,50% 0,74% 11%,76% 24%,96% 24%,100% 42%,82% 42%,80% 65%,20% 65%,18% 42%,0 42%); }
+  .building-body { top: 2rem; left: .65rem; width: 8.2rem; height: 4.3rem; border: 4px solid #6b3528; background: linear-gradient(90deg,#7e382b,#a94936 50%,#713126); }
+  .building-body::before { content: ''; position: absolute; inset: .5rem; border: 1px solid #d0a15b; background: repeating-linear-gradient(90deg,transparent 0 1.65rem,#553129 1.68rem 1.82rem); }
+  .building-door { z-index: 1; top: 2.25rem; left: 3.4rem; width: 2.75rem; height: 4rem; border: 3px solid #49352b; background: repeating-linear-gradient(90deg,#d7c194 0 2px,#694238 3px 5px); }
+  .bell-rope { z-index: 3; top: .9rem; left: 4.55rem; width: 3px; height: 2rem; background: #d7b66c; }
+  .omikuji-stand { position: relative; display: block; width: 4.25rem; height: 4.6rem; filter: drop-shadow(0 4px 5px #17261f99); }
+  .omikuji-stand i { position: absolute; display: block; }
+  .stand-roof { top: .1rem; left: -.15rem; width: 4.55rem; height: 1.3rem; background: #302724; clip-path: polygon(7% 25%,30% 25%,50% 0,70% 25%,93% 25%,100% 65%,0 65%); }
+  .stand-body { top: .95rem; left: .35rem; width: 3.55rem; height: 3.25rem; border: 2px solid #d0ad70; border-radius: .25rem; background: linear-gradient(90deg,#8e3029,#b34234,#822620); }
+  .fortune-paper { z-index: 1; top: 1.4rem; left: 1.15rem; width: 1.8rem; height: 2.6rem; transform: rotate(5deg); border: 1px solid #d4c29e; background: #f9f1dd; }
+  .paper-mark { z-index: 2; top: 1.72rem; left: 1.45rem; width: 1.2rem; height: 1.9rem; background: repeating-linear-gradient(0deg,#9d3029 0 2px,transparent 2px 7px); }
+  .map-direction { position: absolute; z-index: 2; top: 1rem; right: 1.2rem; display: grid; justify-items: center; color: #f4dfb0; font-size: .66rem; line-height: 1; }
+  .map-direction b { font-size: 1.5rem; font-weight: 400; }
+  .map-note { margin: 0; padding: .65rem 1rem; color: #d9dfd0; border-top: 1px solid #b69a6838; background: #0d2029b8; font-size: .76rem; letter-spacing: .04em; }
+  .shrine-footer { display: flex; justify-content: space-between; gap: .8rem; padding: 1rem .5rem .25rem; color: #aebdb5; font-size: .7rem; letter-spacing: .12em; }
+  .landmark-dialog { position: fixed; width: min(58rem,calc(100vw - 2rem)); max-width: none; max-height: min(92vh,58rem); overflow: auto; overscroll-behavior: contain; padding: 1.35rem; color: #30291f; border: 2px solid #bda780; border-radius: 1rem; background: #fcf7ec; box-shadow: 0 20px 75px #000a; }
+  .landmark-dialog::backdrop { background: #07141dcc; backdrop-filter: blur(3px); }
+  .dialog-close { position: absolute; top: .55rem; right: .65rem; width: 2.25rem; height: 2.25rem; padding: 0; color: #6f2a25; border: 1px solid #c4ad85; border-radius: 50%; background: #fffaf0; font-size: 1.6rem; line-height: 1; }
+  .dialog-overline { margin: 0; color: #8d7248; font-size: .68rem; letter-spacing: .18em; }
+  .landmark-dialog h2 { margin: .25rem 2.5rem .65rem 0; color: #982f2b; font-size: 1.7rem; letter-spacing: .08em; }
+  .dialog-copy { color: #393126; font-size: .95rem; line-height: 1.9; }
+  .landmark-frame { display: block; width: 100%; height: min(68vh,40rem); min-height: 24rem; border: 0; border-radius: .55rem; background: #101f2a; }
+  #haiden-frame.landmark-frame,#torii-frame.landmark-frame { height: min(68vh,40rem); min-height: 0; }
+  #office-frame.landmark-frame { height: 32rem; min-height: 0; }
+  #chozuya-frame.landmark-frame { height: 24rem; min-height: 0; background: #153b42; }
+  .landmark-frame[hidden] { display: none; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  @media (max-width: 620px) {
+    .shrine-page { margin: -1rem -.5rem 0; padding-inline: .5rem; }
+    .shrine-wrap { padding: .6rem .1rem 1rem; }
+    .shrine-mast { padding-top: .7rem; }
+    .shrine-map { height: 35rem; }
+    .map-caption { align-items: start; flex-direction: column; gap: .15rem; padding: .7rem .8rem; }
+    .map-hint { font-size: .68rem; }
+    .approach-path { width: 48%; }
+    .cross-path { left: 2%; right: 2%; }
+    .cross-path-two { left: 7%; right: 7%; }
+    .place-chōzuya { left: 3%; }
+    .place-office { right: 3%; }
+    .pavilion-art { transform: scale(.8); margin: -.35rem 0; }
+    .shrine-building { transform: scale(.82); margin: -.55rem 0; }
+    .place-label { font-size: .62rem; }
+    .forest { width: 19%; }
+    .garden { width: 13%; }
+    .shrine-footer { font-size: .61rem; }
+    #haiden-frame.landmark-frame,#torii-frame.landmark-frame { height: min(60dvh,32rem); }
+  }
+  @media (prefers-reduced-motion: reduce) { .map-place { transition: none; animation: none; } }
+</style>

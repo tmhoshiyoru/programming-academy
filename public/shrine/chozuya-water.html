@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>手水舍・清水微漾</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; min-height: 0; overflow: hidden; }
+    body { background: #d7c9aa; }
+    .experience {
+      position: relative; width: 100%; aspect-ratio: 1.62 / 1; min-height: 300px; overflow: hidden;
+      isolation: isolate; border: 1px solid #b49b70; border-radius: 1rem;
+      background: linear-gradient(180deg,#d9d0b9 0%,#b6ad91 36%,#50664d 37%,#364d40 100%);
+      box-shadow: inset 0 0 0 7px #efe4c8, inset 0 0 0 10px #8b7655, 0 12px 30px #51443145;
+      touch-action: manipulation; cursor: pointer;
+    }
+    .garden-glow { position: absolute; inset: 25% 0 0; z-index: -1; background: radial-gradient(ellipse at 18% 42%,#b4bd7e 0 2%,transparent 28%),radial-gradient(ellipse at 85% 48%,#a8b77b 0 2%,transparent 27%),linear-gradient(180deg,#607451,#324b3e); }
+    .leaf-shadow { position: absolute; top: 24%; width: 22%; height: 27%; opacity: .42; background: radial-gradient(ellipse at 35% 45%,#254438 0 8%,transparent 9%),radial-gradient(ellipse at 60% 60%,#294b3d 0 14%,transparent 15%),radial-gradient(ellipse at 70% 25%,#315741 0 10%,transparent 11%); filter: blur(1px); }
+    .leaf-shadow.left { left: -3%; }.leaf-shadow.right { right: -3%; transform: scaleX(-1); }
+    .roof { position: absolute; z-index: 1; top: 4%; left: 9%; width: 82%; height: 19%; filter: drop-shadow(0 5px 4px #3b302666); }
+    .roof-cap { position: absolute; inset: 0 0 45%; background: linear-gradient(180deg,#403b33,#282d2a 75%,#5b4531); clip-path: polygon(0 72%,6% 53%,18% 48%,31% 12%,50% 0,69% 12%,82% 48%,94% 53%,100% 72%,96% 100%,4% 100%); }
+    .roof-eave { position: absolute; bottom: 27%; left: 4%; width: 92%; height: 18%; border: 2px solid #d0ae70; background: linear-gradient(#a77b45,#745331); clip-path: polygon(0 18%,50% 0,100% 18%,96% 100%,4% 100%); }
+    .roof-under { position: absolute; bottom: 0; left: 20%; width: 60%; height: 31%; background: repeating-linear-gradient(90deg,#514538 0 5px,#c5a975 5px 9px,#6d5840 9px 14px); border-bottom: 5px solid #8a6840; }
+    .post { position: absolute; z-index: 2; top: 19%; bottom: 36%; width: 3.4%; background: linear-gradient(90deg,#714632,#aa6845 35%,#c18a57 55%,#74452f); border-inline: 1px solid #dbb57a; box-shadow: 4px 4px 8px #29322955; }
+    .post.left { left: 19%; }.post.right { right: 19%; }
+    .back-screen { position: absolute; z-index: 0; top: 20%; left: 22%; right: 22%; height: 17%; border: 3px solid #9b774b; background: repeating-linear-gradient(90deg,#e0d4b8 0 5px,#75604a 5px 8px,#e9ddc2 8px 13px); opacity: .92; }
+    .basin {
+      position: absolute; z-index: 3; left: 9%; right: 9%; bottom: 6%; height: 52%;
+      border: clamp(10px,1.4vw,17px) solid #89816c; border-top-width: clamp(15px,2vw,24px); border-radius: 13% 13% 8% 8%;
+      background: linear-gradient(180deg,#b5aa8d,#777361 18%,#777361); box-shadow: 0 10px 18px #17251f70, inset 0 0 0 3px #d0c3a0;
+    }
+    .basin::before { content: ""; position: absolute; top: -18px; left: -10px; right: -10px; height: 22px; border-radius: 50%; border: 3px solid #d1c29b; background: linear-gradient(180deg,#a59a7f,#746f5e); }
+    .waterline { position: absolute; inset: 9% 2.8% 4%; overflow: hidden; border-radius: 4% 4% 7% 7%; background: linear-gradient(180deg,#7d9b8c 0%,#5e8378 20%,#456f68 68%,#355b58 100%); box-shadow: inset 0 7px 14px #253f3c88, inset 0 -13px 20px #1d414266; }
+    .waterline::before { content: ""; position: absolute; inset: 0; opacity: .18; background-image: radial-gradient(#e6e0c5 1px,transparent 1.8px); background-size: 23px 19px; }
+    .water-glint { position: absolute; height: 2px; border-radius: 50%; background: #e7e0bf87; filter: blur(.5px); animation: glint 6s ease-in-out infinite alternate; }
+    .glint-a { top: 35%; left: 12%; width: 20%; }.glint-b { top: 67%; right: 15%; width: 13%; animation-delay: -2s; }.glint-c { top: 51%; left: 55%; width: 9%; animation-delay: -4s; }
+    @keyframes glint { from { transform: translateX(-10px) scaleX(.7); opacity: .25; } to { transform: translateX(12px) scaleX(1.2); opacity: .75; } }
+    .bamboo-spout { position: absolute; z-index: 5; top: 32%; left: 50%; width: 30%; height: 10%; transform: translateX(-50%); }
+    .bamboo-pipe { position: absolute; left: 0; right: 0; top: 8%; height: 42%; border: 2px solid #826c3b; border-radius: 999px; background: repeating-linear-gradient(90deg,#b8aa69 0 28%,#d6ca85 29% 31%,#827341 32% 34%,#b4a45e 35% 66%,#d3c780 67% 69%,#827341 70% 72%,#b5a462 73%); box-shadow: 0 3px 5px #26352a77; }
+    .bamboo-joint { position: absolute; top: 5%; left: 31%; width: 4px; height: 48%; background: #715f38; }.bamboo-joint.second { left: 68%; }
+    .spout-tip { position: absolute; top: 32%; left: 48%; width: 13%; height: 53%; border: 2px solid #78663c; border-top: 0; border-radius: 0 0 40% 40%; background: linear-gradient(90deg,#95834c,#d0c47b,#8b7844); }
+    .water-stream { position: absolute; top: 77%; left: 53%; width: 4px; height: 45%; border-radius: 50%; background: linear-gradient(#c2e1cfaa,#e5e8c9); opacity: .7; animation: stream 1.8s ease-in-out infinite; }
+    @keyframes stream { 0%,100% { transform: scaleY(.55); opacity: .35; } 50% { transform: scaleY(1); opacity: .85; } }
+    .drop { position: absolute; top: 106%; left: calc(53% - 3px); width: 7px; height: 10px; border-radius: 60% 60% 65% 10%; transform: rotate(-35deg); background: #e4edcf; opacity: 0; animation: drop 3.2s ease-in infinite; }
+    @keyframes drop { 0%,52% { top: 103%; opacity: 0; } 59% { opacity: .9; } 73% { top: 175%; opacity: .7; } 74%,100% { top: 175%; opacity: 0; } }
+    .ladle { position: absolute; z-index: 6; right: 15%; top: 40%; width: 18%; height: 14%; transform: rotate(-24deg); filter: drop-shadow(2px 4px 3px #29332766); pointer-events: none; }
+    .ladle-handle { position: absolute; left: 30%; top: 45%; width: 68%; height: 8px; border-radius: 8px; background: linear-gradient(#d6c28b,#8b7546); }
+    .ladle-cup { position: absolute; left: 0; top: 12%; width: 42%; aspect-ratio: 1.35; border: 3px solid #89764c; border-radius: 50%; background: linear-gradient(145deg,#d1c294,#92835d); box-shadow: inset 0 2px 3px #f0e1b5; }
+    .petal { position: absolute; z-index: 2; width: clamp(12px,1.4vw,18px); height: clamp(17px,1.9vw,24px); border-radius: 90% 10% 80% 20%; background: linear-gradient(145deg,#f4e5d5,#d8aaa0 72%,#bb7c72); box-shadow: 0 2px 6px #173b3455; opacity: .9; pointer-events: none; animation: drift var(--duration,18s) ease-in-out infinite alternate; }
+    .petal:nth-child(1) { top: 29%; left: 25%; --duration: 23s; }.petal:nth-child(2) { top: 62%; left: 68%; --duration: 19s; animation-delay: -7s; transform: scale(.75) rotate(68deg); }.petal:nth-child(3) { top: 42%; left: 82%; --duration: 27s; animation-delay: -13s; transform: scale(.65) rotate(130deg); }
+    @keyframes drift { 0% { translate: -6px -3px; rotate: -8deg; } 45% { translate: 10px 5px; rotate: 17deg; } 100% { translate: -2px 12px; rotate: 32deg; } }
+    .ripple { position: absolute; z-index: 3; width: var(--size,70px); aspect-ratio: 1; border: 1px solid #e5e5caad; border-radius: 50%; transform: translate(-50%,-50%) scale(.12); opacity: 0; pointer-events: none; animation: ripple 3.7s ease-out forwards; box-shadow: 0 0 10px #e0e6d122, inset 0 0 8px #d7ddbc18; }
+    .ripple::before,.ripple::after { content: ""; position: absolute; inset: 17%; border: 1px solid #dce5d18a; border-radius: 50%; }.ripple::after { inset: 35%; opacity: .72; }
+    @keyframes ripple { 0% { opacity: .8; transform: translate(-50%,-50%) scale(.12); } 70% { opacity: .35; } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1); } }
+    @media (max-width: 620px) {
+      .experience { aspect-ratio: .88 / 1; min-height: 390px; }
+      .roof { top: 5%; left: 4%; width: 92%; height: 19%; }.post.left { left: 12%; }.post.right { right: 12%; }
+      .back-screen { left: 16%; right: 16%; }.basin { left: 4%; right: 4%; bottom: 5%; height: 52%; }
+      .bamboo-spout { top: 33%; width: 42%; }.ladle { right: 9%; top: 41%; width: 22%; }
+    }
+    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
+  </style>
+</head>
+<body>
+  <main class="experience" id="experience" aria-label="手水舍的石鉢清水，可點擊欣賞漣漪">
+    <div class="garden-glow" aria-hidden="true"></div><div class="leaf-shadow left" aria-hidden="true"></div><div class="leaf-shadow right" aria-hidden="true"></div>
+    <div class="roof" aria-hidden="true"><i class="roof-cap"></i><i class="roof-eave"></i><i class="roof-under"></i></div>
+    <i class="post left" aria-hidden="true"></i><i class="post right" aria-hidden="true"></i><div class="back-screen" aria-hidden="true"></div>
+    <div class="bamboo-spout" aria-hidden="true"><i class="bamboo-pipe"></i><i class="bamboo-joint"></i><i class="bamboo-joint second"></i><i class="spout-tip"></i><i class="water-stream"></i><i class="drop"></i></div>
+    <div class="ladle" aria-hidden="true"><i class="ladle-cup"></i><i class="ladle-handle"></i></div>
+    <div class="basin" aria-hidden="true">
+      <div class="waterline" id="waterline"><i class="water-glint glint-a"></i><i class="water-glint glint-b"></i><i class="water-glint glint-c"></i><i class="petal"></i><i class="petal"></i><i class="petal"></i></div>
+    </div>
+  </main>
+  <script>
+    (() => {
+      const scene = document.querySelector('#experience');
+      const water = document.querySelector('#waterline');
+      if (!scene || !water) return;
+
+      function makeRipple(x, y, size = 100) {
+        const ripple = document.createElement('i');
+        ripple.className = 'ripple';
+        ripple.style.left = `${x}%`;
+        ripple.style.top = `${y}%`;
+        ripple.style.setProperty('--size', `${size}px`);
+        water.append(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+      }
+      function gentleRipple() {
+        makeRipple(18 + Math.random() * 64, 18 + Math.random() * 64, 65 + Math.random() * 70);
+        window.setTimeout(gentleRipple, 3200 + Math.random() * 2800);
+      }
+      window.setTimeout(gentleRipple, 900);
+      scene.addEventListener('pointerdown', (event) => {
+        const bounds = water.getBoundingClientRect();
+        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) return;
+        makeRipple(((event.clientX - bounds.left) / bounds.width) * 100, ((event.clientY - bounds.top) / bounds.height) * 100, 100 + Math.random() * 75);
+      });
+
+      function reportHeight() {
+        parent.postMessage({ type: 'shrine-chozuya:resize', height: Math.ceil(scene.getBoundingClientRect().height) }, '*');
+      }
+      new ResizeObserver(reportHeight).observe(scene);
+      window.addEventListener('load', reportHeight);
+      window.addEventListener('resize', reportHeight);
+      reportHeight();
+    })();
+  </script>
+</body>
+</html>

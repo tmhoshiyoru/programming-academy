@@ -48,10 +48,14 @@ const treeHtml = renderCourseTree(buildCourseTree(lessons, currentCourseId, cour
     {treeHtml ? <Fragment set:html={treeHtml} /> : <p class="sidebar-empty">這門課程目前還沒有章節。</p>}
   </nav>
   <div class="sidebar-tools">
+    <p class="sidebar-tools-heading">小工具</p>
     <a href={siteUrl('/simulator/')}>
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2" /><path d="M8 22h8M12 18v4M7 9h10M7 13h5" /></svg>
       <span>網頁模擬器</span>
-      <svg class="tool-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+    </a>
+    <a href={siteUrl('/cpp-debug/')}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 6-6 6 6 6m8-12 6 6-6 6M14 4l-4 16" /></svg>
+      <span>C++ Debug 工具</span>
     </a>
   </div>
 </aside>
