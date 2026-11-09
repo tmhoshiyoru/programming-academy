@@ -1,0 +1,114 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { siteUrl } from '../lib/site-url';
+
+const example = `#include <iostream>
+using namespace std;
+int main(){
+int score=90;
+if(score>=60){
+cout<<"Pass"<<endl;
+}else{
+cout<<"Try again"<<endl;
+}
+return 0;
+}`;
+---
+
+<SiteLayout title="C++ 自動縮排工具" description="檢查 C++ 程式語法，並使用四個空白整理縮排。">
+  <section class="article cpp-indent" data-worker={siteUrl('/cpp-compiler/check-worker.js')}>
+    <p class="eyebrow">獨立工具</p>
+    <h1>C++ 自動縮排工具</h1>
+    <p>貼上單檔 C++17 程式碼。確認語法正確後，工具會依程式區塊整理縮排，每一層使用四個空白。</p>
+
+    <div class="editor-header">
+      <label for="indent-source">C++ 程式碼</label>
+      <button type="button" id="indent-example">載入範例</button>
+    </div>
+    <div class="cpp-editor" id="indent-editor">
+      <div class="cpp-gutter" aria-hidden="true"><pre id="indent-line-numbers"></pre></div>
+      <div class="cpp-highlight" aria-hidden="true"><pre id="indent-highlight"></pre></div>
+      <textarea id="indent-source" rows="14" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off">{example}</textarea>
+    </div>
+    <div class="actions">
+      <button type="button" id="indent-run">檢查語法並整理縮排</button>
+      <button type="button" id="indent-stop" hidden>停止檢查</button>
+    </div>
+    <p class="load-note">首次檢查需載入約 28 MB 的編譯工具。程式碼只在你的瀏覽器中處理。</p>
+
+    <section class="result" aria-labelledby="indent-result-title">
+      <div class="result-heading">
+        <h2 id="indent-result-title">整理結果</h2>
+        <button type="button" id="indent-copy" hidden>複製</button>
+      </div>
+      <p id="indent-status" role="status">貼上程式碼後，按「檢查語法並整理縮排」。</p>
+      <div class="formatted-output" id="indent-output" hidden>
+        <div class="output-gutter" aria-hidden="true"><pre id="indent-output-lines"></pre></div>
+        <pre class="output-code"><code id="indent-output-code" class="language-cpp"></code></pre>
+      </div>
+      <details id="indent-errors" hidden>
+        <summary>查看編譯器訊息</summary>
+        <pre id="indent-error-log"></pre>
+      </details>
+    </section>
+  </section>
+</SiteLayout>
+
+<script>
+  import '../scripts/cpp-indent';
+</script>
+
+<style>
+  .cpp-indent { max-width: 68rem; margin-inline: auto; }
+  .editor-header, .actions, .result-heading { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; }
+  .editor-header { justify-content: space-between; margin-bottom: .45rem; }
+  label { font-weight: 700; }
+  .cpp-editor { --gutter-width: 2.8rem; position: relative; overflow: hidden; border: 1px solid #88a594; border-radius: .6rem; background: #f8fbf8; }
+  .cpp-editor:focus-within { outline: 2px solid #bd861e; outline-offset: 2px; }
+  .cpp-editor :is(textarea, pre) { margin: 0; padding: .8rem; color: #192d23; font: .95rem/1.5 ui-monospace, monospace; font-variant-ligatures: none; tab-size: 4; white-space: pre; }
+  .cpp-editor textarea { position: relative; display: block; box-sizing: border-box; margin-inline-start: var(--gutter-width); width: calc(100% - var(--gutter-width)); min-height: 17rem; resize: vertical; border: 0; outline: 0; background: transparent; }
+  .cpp-editor pre { overflow: visible; background: transparent; border: 0; border-radius: 0; }
+  /* SiteLayout styles article code blocks as white-on-dark; this editor uses a light surface. */
+  .cpp-indent .cpp-editor .cpp-highlight pre { color: #192d23; }
+  .cpp-highlight, .cpp-gutter { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .cpp-highlight { inset-inline-start: var(--gutter-width); visibility: hidden; }
+  .cpp-gutter { box-sizing: border-box; inset-inline-end: auto; width: var(--gutter-width); background: #edf4ef; border-inline-end: 1px solid #cbdace; }
+  .cpp-gutter pre { padding-inline: .45rem; color: #486054; text-align: end; }
+  .cpp-editor.is-highlighted .cpp-highlight { visibility: visible; }
+  .cpp-editor.is-highlighted textarea { color: transparent; caret-color: #192d23; }
+  .cpp-editor.is-highlighted textarea::selection { color: transparent; background: #588ac654; }
+  .cpp-highlight :global(.token.keyword), .cpp-highlight :global(.token.directive) { color: #783b94; }
+  .cpp-highlight :global(.token.string), .cpp-highlight :global(.token.char) { color: #1b663f; }
+  .cpp-highlight :global(.token.number), .cpp-highlight :global(.token.boolean) { color: #9a471d; }
+  .cpp-highlight :global(.token.comment) { color: #52665b; }
+  .cpp-highlight :global(.token.function), .cpp-highlight :global(.token.class-name) { color: #215b98; }
+  .cpp-highlight :global(.token.operator) { color: #923443; }
+  button { font: inherit; cursor: pointer; padding: .45rem .8rem; border: 1px solid #84a392; border-radius: .5rem; background: #f5faf6; color: #164330; }
+  button:disabled { opacity: .65; cursor: default; }
+  #indent-run { background: #1b5843; color: white; font-weight: 700; }
+  .actions { margin-top: .8rem; }
+  .load-note { color: #485d52; font-size: .86rem; }
+  .result { margin-top: 1.2rem; padding: 1rem; border: 1px solid #bbd0c3; border-radius: .7rem; background: #f7faf7; }
+  .result-heading { justify-content: space-between; }
+  .result h2 { margin-block: 0; }
+  .formatted-output { --gutter-width: 2.8rem; position: relative; display: flex; overflow: auto; border: 1px solid #bdcec1; border-radius: .6rem; background: #f8fbf8; }
+  .output-gutter { flex: 0 0 var(--gutter-width); color: #486054; background: #edf4ef; border-inline-end: 1px solid #cbdace; text-align: end; }
+  .output-gutter pre, .output-code { margin: 0; padding: .8rem; font: .95rem/1.5 ui-monospace, monospace; white-space: pre; }
+  .output-gutter pre { padding-inline: .45rem; }
+  .cpp-indent .formatted-output .output-code { flex: 1; min-width: max-content; color: #192d23; background: transparent; }
+  .cpp-indent .formatted-output .output-code :global(.token.keyword),
+  .cpp-indent .formatted-output .output-code :global(.token.directive) { color: #783b94; }
+  .cpp-indent .formatted-output .output-code :global(.token.string),
+  .cpp-indent .formatted-output .output-code :global(.token.char) { color: #1b663f; }
+  .cpp-indent .formatted-output .output-code :global(.token.number),
+  .cpp-indent .formatted-output .output-code :global(.token.boolean) { color: #9a471d; }
+  .cpp-indent .formatted-output .output-code :global(.token.comment) { color: #52665b; }
+  .cpp-indent .formatted-output .output-code :global(.token.function),
+  .cpp-indent .formatted-output .output-code :global(.token.class-name) { color: #215b98; }
+  .cpp-indent .formatted-output .output-code :global(.token.operator) { color: #923443; }
+  #indent-errors { margin-top: .8rem; }
+  #indent-errors summary { cursor: pointer; }
+  #indent-error-log { overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+  [hidden] { display: none !important; }
+  @media (forced-colors: active) { .cpp-editor.is-highlighted .cpp-highlight { visibility: hidden; } .cpp-editor.is-highlighted textarea { color: FieldText; caret-color: auto; } }
+</style>

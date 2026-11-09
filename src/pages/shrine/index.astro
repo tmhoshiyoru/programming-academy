@@ -3,12 +3,12 @@ import SiteLayout from '../../layouts/SiteLayout.astro';
 import { siteUrl } from '../../lib/site-url';
 ---
 
-<SiteLayout title="網海神社" description="沿著海邊參道走進網海神社，探索各個神社地標。" hideShrineLink>
+<SiteLayout title="綠園神社" description="沿著海邊參道走進綠園神社，探索各個神社地標。" hideShrineLink>
   <div class="shrine-page">
     <div class="shrine-wrap">
       <header class="shrine-mast">
         <p class="shrine-eyebrow">網路平安祈願所</p>
-        <h1>網海神社</h1>
+        <h1>綠園神社</h1>
         <p class="shrine-subtitle">循著潮聲前行，願你在網路世界平安自在。</p>
         <div class="gold-divider" aria-hidden="true"><span>✦</span></div>
       </header>
@@ -22,7 +22,7 @@ import { siteUrl } from '../../lib/site-url';
           <p class="map-hint">點選地標，看看神社裡有什麼。</p>
         </div>
 
-        <div class="shrine-map" id="shrine-map" aria-label="網海神社境內地圖">
+        <div class="shrine-map" id="shrine-map" aria-label="綠園神社境內地圖">
           <div class="sea" aria-hidden="true"><i></i><i></i><i></i></div>
           <div class="shoreline" aria-hidden="true"></div>
           <div class="forest forest-left" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -73,19 +73,19 @@ import { siteUrl } from '../../lib/site-url';
 
           <span class="map-direction" aria-label="北方">北 <b>↑</b></span>
         </div>
-        <p class="map-note" aria-live="polite" id="map-note">沿著參道走進網海神社，在樹影與潮聲之間停下腳步，讓心情慢慢安定。</p>
+        <p class="map-note" aria-live="polite" id="map-note">沿著參道走進綠園神社，在樹影與潮聲之間停下腳步，讓心情慢慢安定。</p>
         <span class="sr-only" id="map-click-status" aria-live="polite"></span>
       </section>
 
-      <footer class="shrine-footer"><span>網海神社</span><span>潮聲與燈火，伴你平安歸途</span></footer>
+      <footer class="shrine-footer"><span>綠園神社</span><span>潮聲與燈火，伴你平安歸途</span></footer>
     </div>
 
     <dialog class="landmark-dialog" id="landmark-dialog" aria-labelledby="dialog-title">
       <button class="dialog-close" type="button" aria-label="關閉視窗">×</button>
-      <p class="dialog-overline">網海神社・境內地標</p>
+      <p class="dialog-overline">綠園神社・境內地標</p>
       <h2 id="dialog-title"></h2>
       <div class="dialog-copy" id="dialog-copy"></div>
-      <iframe class="landmark-frame" id="omikuji-frame" src={siteUrl('/shrine/omikuji.html')} title="網海神社御神籤互動頁面" sandbox="allow-scripts" hidden></iframe>
+      <iframe class="landmark-frame" id="omikuji-frame" src={siteUrl('/shrine/omikuji.html')} title="綠園神社御神籤互動頁面" sandbox="allow-scripts" hidden></iframe>
       <iframe class="landmark-frame" id="offertory-frame" src={siteUrl('/shrine/saisen-routing.html')} title="賽錢箱內的封包道路互動遊戲" sandbox="allow-scripts" hidden></iframe>
       <iframe class="landmark-frame" id="haiden-frame" src={siteUrl('/shrine/haiden-memory.html')} title="拜殿參拜節奏遊戲" sandbox="allow-scripts" hidden></iframe>
       <iframe class="landmark-frame" id="torii-frame" src={siteUrl('/shrine/torii-maze.html')} title="鳥居迷宮遊戲" sandbox="allow-scripts" hidden></iframe>
@@ -109,8 +109,9 @@ import { siteUrl } from '../../lib/site-url';
   const officeFrame = document.querySelector<HTMLIFrameElement>('#office-frame');
   const chozuyaFrame = document.querySelector<HTMLIFrameElement>('#chozuya-frame');
   let activeLandmark = '';
+  let frameVisit = 0;
   let offertoryFrameHeight = 680;
-  const shrineIntroduction = '沿著參道走進網海神社，在樹影與潮聲之間停下腳步，讓心情慢慢安定。';
+  const shrineIntroduction = '沿著參道走進綠園神社，在樹影與潮聲之間停下腳步，讓心情慢慢安定。';
   const landmarks: Record<string, { title: string; copy: string; note: string }> = {
     torii: { title: '鳥居', copy: '', note: '鳥居的朱紅柱與橫木，藏著一條通往出口的迷宮。' },
     chozuya: { title: '手水舍', copy: '', note: '石鉢裡的清水靜靜流動，偶爾漾開一圈漣漪。' },
@@ -167,11 +168,11 @@ import { siteUrl } from '../../lib/site-url';
     dialog.showModal();
     if (frame) {
       activeLandmark = place;
-      if (place === 'office' && !frame.hasAttribute('src')) {
-        frame.src = frame.dataset.src ?? '/shrine/office-memory.html';
-      }
-      if (place === 'chozuya' && !frame.hasAttribute('src')) {
-        frame.src = frame.dataset.src ?? '/shrine/chozuya-water.html';
+      const frameSource = frame.dataset.src ?? frame.getAttribute('src');
+      if (frameSource) {
+        const visitUrl = new URL(frameSource, window.location.href);
+        visitUrl.searchParams.set('visit', `${Date.now()}-${++frameVisit}`);
+        frame.src = visitUrl.href;
       }
       const availableHeight = Math.max(340, Math.floor(window.innerHeight * 0.92 - 130));
       if (place === 'offertory') {

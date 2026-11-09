@@ -9,17 +9,17 @@
     *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#f8f0df;color:var(--ink);font-family:system-ui,"Noto Sans TC",sans-serif}body{padding:clamp(.55rem,2vw,1rem);overflow:hidden}
     .game{width:min(100%,58rem);margin:0 auto}header{display:flex;align-items:end;justify-content:space-between;gap:.75rem;margin:0 0 .6rem}h1{margin:0;color:#74362d;font-family:serif;font-size:clamp(1.1rem,3vw,1.55rem);letter-spacing:.08em}.subtitle{margin:.2rem 0 0;color:#75634c;font-size:.78rem}
     .restart{flex:none;padding:.5rem .85rem;border:1px solid #9c8053;border-radius:999px;background:#fffaf0;color:#553e2c;font:inherit;font-size:.8rem;cursor:pointer}.scorebar{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.55rem;padding:.55rem .75rem;border:1px solid var(--line);border-radius:.7rem;background:#fffaf2;color:#574835;font-size:.82rem}.scorebar strong{color:#74362d;font-variant-numeric:tabular-nums}
-    .board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:clamp(.3rem,1vw,.55rem)}.card{position:relative;aspect-ratio:1/1.12;min-width:0;padding:0;border:0;border-radius:.55rem;background:transparent;cursor:pointer;transition:opacity .25s ease}.card.is-matched{opacity:1;cursor:default}
-    .face{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;border:1px solid #c6ab75;border-radius:.55rem;box-shadow:0 2px 5px #46362020;transition:transform .25s ease,opacity .2s ease}.back{z-index:2;transform:scaleX(1);opacity:1;background:radial-gradient(circle at 50% 48%,#a7483d 0 24%,transparent 25%),linear-gradient(145deg,#913b32,#6f2b2a)}.back:before{position:absolute;inset:5px;content:"";border:1px solid #e1c486;border-radius:.35rem;background:repeating-linear-gradient(45deg,transparent 0 8px,#efd99c22 8px 10px,transparent 10px 18px)}.back:after{position:relative;content:"✿";display:grid;place-items:center;width:1.45rem;aspect-ratio:1;border:1px solid #f0d99e;border-radius:50%;background:#77312c;color:#f8e8bc;font-family:serif;font-size:1rem}.front{z-index:1;transform:scaleX(.12);opacity:0;padding:5%;background:#fffaf0}.card.is-open .back,.card.is-matched .back{z-index:1;transform:scaleX(.12);opacity:0;pointer-events:none}.card.is-open .front,.card.is-matched .front{z-index:2;transform:scaleX(1);opacity:1}.front img{display:block;width:100%;height:100%;object-fit:cover;border-radius:.35rem}.front.image-error:after{content:"圖片載入失敗";color:#74362d;font-size:.7rem}
+    .board{display:grid;height:min(calc(var(--host-height,100vh)*.62),34rem);grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:clamp(.3rem,1vw,.55rem)}.card{position:relative;height:100%;min-width:0;padding:0;border:0;border-radius:.55rem;background:transparent;cursor:pointer;transition:opacity .25s ease}.card.is-matched{opacity:1;cursor:default}
+    .face{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;border:1px solid #c6ab75;border-radius:.55rem;box-shadow:0 2px 5px #46362020;transition:transform .25s ease,opacity .2s ease}.back{z-index:2;transform:scaleX(1);opacity:1;background:radial-gradient(circle at 50% 48%,#a7483d 0 24%,transparent 25%),linear-gradient(145deg,#913b32,#6f2b2a)}.back:before{position:absolute;inset:5px;content:"";border:1px solid #e1c486;border-radius:.35rem;background:repeating-linear-gradient(45deg,transparent 0 8px,#efd99c22 8px 10px,transparent 10px 18px)}.back:after{position:relative;content:"✿";display:grid;place-items:center;width:1.45rem;aspect-ratio:1;border:1px solid #f0d99e;border-radius:50%;background:#77312c;color:#f8e8bc;font-family:serif;font-size:1rem}.front{z-index:1;transform:scaleX(.12);opacity:0;padding:0;background:#fffaf0}.card.is-open .back,.card.is-matched .back{z-index:1;transform:scaleX(.12);opacity:0;pointer-events:none}.card.is-open .front,.card.is-matched .front{z-index:2;transform:scaleX(1);opacity:1}.front img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;border-radius:.35rem}.front.image-error:after{content:"圖片載入失敗";color:#74362d;font-size:.7rem}
     .card:focus-visible{outline:3px solid #3689bf;outline-offset:2px;z-index:1}.message{min-height:1.55rem;margin:.55rem 0 0;color:#315c4b;text-align:center;font-size:.82rem;font-weight:650}
-    @media(max-width:620px){body{padding:.45rem}.game{width:100%}header{margin-bottom:.35rem}h1{font-size:1.08rem}.board{grid-template-columns:repeat(4,minmax(0,1fr));gap:.24rem}.card{aspect-ratio:1/1.12;border-radius:.32rem}.face{border-radius:.32rem}.front{padding:3%}.front img{border-radius:.2rem}.scorebar{margin-bottom:.35rem;padding:.4rem .55rem;font-size:.68rem}.subtitle{font-size:.68rem}.restart{padding:.4rem .55rem;font-size:.7rem}.message{margin-top:.35rem;font-size:.68rem}}
+    @media(max-width:620px){body{padding:.45rem}.game{width:100%}header{margin-bottom:.35rem}h1{font-size:1.08rem}.board{height:min(calc(var(--host-height,100vh)*.52),24rem);grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(6,minmax(0,1fr));gap:.24rem}.card{border-radius:.32rem}.face{border-radius:.32rem}.front img{border-radius:.2rem}.scorebar{margin-bottom:.35rem;padding:.4rem .55rem;font-size:.68rem}.subtitle{font-size:.68rem}.restart{padding:.4rem .55rem;font-size:.7rem}.message{margin-top:.35rem;font-size:.68rem}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}
   </style>
 </head>
 <body>
   <main class="game">
     <header><div><h1>御守結緣</h1><p class="subtitle">風鈴輕響，色彩各異的御守靜靜排列，等待與你相遇。</p></div><button class="restart" id="restart" type="button">重新開始</button></header>
-    <div class="scorebar" aria-label="遊戲進度"><span>翻牌次數 <strong id="turns">0</strong></span><span>已配對 <strong id="pairs">0</strong> / 16 組</span></div>
+    <div class="scorebar" aria-label="遊戲進度"><span>翻牌次數 <strong id="turns">0</strong></span><span>已配對 <strong id="pairs">0</strong> / 12 組</span></div>
     <section class="board" id="board" aria-label="記憶翻牌區"></section>
     <p class="message" id="message" aria-live="polite">御守靜靜排列，等待與你相遇。</p>
   </main>
@@ -36,14 +36,16 @@
       const board=document.querySelector('#board'),turnsEl=document.querySelector('#turns'),pairsEl=document.querySelector('#pairs'),message=document.querySelector('#message');
       const game=document.querySelector('.game');
       let resizeFrame=0;
-      function reportHeight(){cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{const bodyStyle=getComputedStyle(document.body);const verticalPadding=parseFloat(bodyStyle.paddingTop)+parseFloat(bodyStyle.paddingBottom);const height=Math.ceil(game.getBoundingClientRect().height+verticalPadding);parent.postMessage({type:'shrine-office:resize',height},'*')})}
+      function syncHostHeight(){let hostHeight=innerHeight;try{if(parent!==window)hostHeight=parent.innerHeight||hostHeight}catch{}document.documentElement.style.setProperty('--host-height',`${hostHeight}px`)}
+      function reportHeight(){syncHostHeight();cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{const bodyStyle=getComputedStyle(document.body);const verticalPadding=parseFloat(bodyStyle.paddingTop)+parseFloat(bodyStyle.paddingBottom);const height=Math.ceil(game.getBoundingClientRect().height+verticalPadding);parent.postMessage({type:'shrine-office:resize',height},'*')})}
       new ResizeObserver(reportHeight).observe(game);
       window.addEventListener('load',reportHeight);window.addEventListener('resize',reportHeight);
-      let openCards=[],matched=0,turns=0,locked=false,round=0;
+      let openCards=[],matched=0,turns=0,locked=false,round=0,activePictures=[];
       function shuffle(cards){for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]]}return cards}
       function start(){
         round++;openCards=[];matched=0;turns=0;locked=false;turnsEl.textContent='0';pairsEl.textContent='0';message.textContent='御守靜靜排列，等待與你相遇。';
-        const cards=shuffle(pictures.flatMap(([image,label],pair)=>[{image,label,pair},{image,label,pair}]));
+        activePictures=shuffle([...pictures]).slice(0,12);
+        const cards=shuffle(activePictures.flatMap(([image,label],pair)=>[{image,label,pair},{image,label,pair}]));
         board.replaceChildren(...cards.map((card,index)=>{
           const button=document.createElement('button');button.type='button';button.className='card';button.dataset.pair=String(card.pair);button.setAttribute('aria-label',`第 ${index+1} 張牌，尚未翻開`);
           const back=document.createElement('span');back.className='face back';back.setAttribute('aria-hidden','true');
@@ -60,7 +62,7 @@
         if(first.card.pair===second.card.pair){
           for(const item of [first,second]){item.button.classList.add('is-matched');item.button.setAttribute('aria-label',`第 ${item.index+1} 張牌：${item.card.label}，已配對`)}
           matched++;pairsEl.textContent=String(matched);
-          if(matched===pictures.length)message.textContent=`全部配對完成！共翻了 ${turns} 次。想再挑戰一次，可以按「重新開始」。`;
+          if(matched===activePictures.length)message.textContent=`全部配對完成！共翻了 ${turns} 次。想再挑戰一次，可以按「重新開始」。`;
           else message.textContent='兩枚御守在此相逢，願這份緣分常伴。';
         }else{
           locked=true;message.textContent='兩枚御守圖樣不同，緣分尚未相合。';

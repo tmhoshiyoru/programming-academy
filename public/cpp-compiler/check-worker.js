@@ -25,6 +25,7 @@ async function loadModule(name) {
 self.onmessage = async ({ data }) => {
   const source = typeof data === 'string' ? data : data.source;
   const tracing = typeof data !== 'string' && data.type === 'trace';
+  const syntaxOnly = typeof data !== 'string' && data.type === 'syntax';
   let log = '';
   let phase = 'loading';
   try {
@@ -62,6 +63,11 @@ self.onmessage = async ({ data }) => {
     self.postMessage({ type: 'phase', phase });
     log = '';
     await api.compile({ input: 'main.cpp', contents: source, obj: 'main.o' });
+
+    if (syntaxOnly) {
+      self.postMessage({ type: 'result', ok: true, phase: 'compile', log });
+      return;
+    }
 
     phase = 'link';
     self.postMessage({ type: 'phase', phase });
