@@ -1,8 +1,8 @@
 ---
 title: "整數型態：int 與 long long"
 type: interactive
-order: 2
-hidden: false
+order: 5
+hidden: true
 draft: false
 ---
 

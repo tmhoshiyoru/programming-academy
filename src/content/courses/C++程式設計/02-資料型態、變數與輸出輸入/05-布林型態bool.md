@@ -1,8 +1,8 @@
 ---
 title: "布林型態 bool"
 type: interactive
-order: 5
-hidden: false
+order: 8
+hidden: true
 draft: false
 ---
 

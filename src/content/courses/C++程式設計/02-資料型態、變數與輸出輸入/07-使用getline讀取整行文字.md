@@ -1,7 +1,7 @@
 ---
 title: "使用 getline 讀取整行文字"
 type: interactive
-order: 7
+order: 4
 hidden: true
 draft: false
 ---

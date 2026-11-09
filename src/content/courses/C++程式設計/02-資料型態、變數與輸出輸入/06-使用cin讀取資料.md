@@ -1,7 +1,7 @@
 ---
 title: "使用 cin 讀取資料"
 type: interactive
-order: 6
+order: 3
 hidden: false
 draft: false
 ---

@@ -1,8 +1,8 @@
 ---
 title: "浮點數 float、double 與輸出格式"
 type: interactive
-order: 3
-hidden: false
+order: 6
+hidden: true
 draft: false
 ---
 

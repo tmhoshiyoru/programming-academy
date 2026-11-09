@@ -1,8 +1,8 @@
 ---
 title: "字元 char 與字串 string"
 type: interactive
-order: 4
-hidden: false
+order: 7
+hidden: true
 draft: false
 ---
 
