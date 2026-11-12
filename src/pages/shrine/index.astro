@@ -22,7 +22,16 @@ import { siteUrl } from '../../lib/site-url';
           <p class="map-hint">點選地標，看看神社裡有什麼。</p>
         </div>
 
-        <div class="shrine-map" id="shrine-map" aria-label="綠園神社境內地圖">
+        <div
+          class="shrine-map"
+          id="shrine-map"
+          aria-label="綠園神社境內地圖"
+          data-map-spring={siteUrl('/shrine/green-garden-shrine-map-spring.png')}
+          data-map-summer={siteUrl('/shrine/green-garden-shrine-map-summer.png')}
+          data-map-autumn={siteUrl('/shrine/green-garden-shrine-map-autumn.png')}
+          data-map-winter={siteUrl('/shrine/green-garden-shrine-map-winter.png')}
+          style={`--shrine-map-image: url('${siteUrl('/shrine/green-garden-shrine-map.png')}')`}
+        >
           <div class="sea" aria-hidden="true"><i></i><i></i><i></i></div>
           <div class="shoreline" aria-hidden="true"></div>
           <div class="forest forest-left" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -97,6 +106,53 @@ import { siteUrl } from '../../lib/site-url';
 
 <script>
   const map = document.querySelector<HTMLElement>('#shrine-map');
+
+  type ShrineSeason = 'spring' | 'summer' | 'autumn' | 'winter';
+
+  function getSeason(month: number): ShrineSeason {
+    if (month >= 2 && month <= 4) return 'spring';
+    if (month >= 5 && month <= 7) return 'summer';
+    if (month >= 8 && month <= 10) return 'autumn';
+    return 'winter';
+  }
+
+  function updateSeasonalMap() {
+    if (!map) return;
+
+    const imageBySeason: Record<ShrineSeason, string | undefined> = {
+      spring: map.dataset.mapSpring,
+      summer: map.dataset.mapSummer,
+      autumn: map.dataset.mapAutumn,
+      winter: map.dataset.mapWinter,
+    };
+    const image = imageBySeason[getSeason(new Date().getMonth())];
+
+    if (image) {
+      map.style.setProperty('--shrine-map-image', `url("${image}")`);
+    }
+  }
+
+  let seasonRefreshTimer: number | undefined;
+
+  function scheduleSeasonRefresh() {
+    updateSeasonalMap();
+
+    if (seasonRefreshTimer !== undefined) {
+      window.clearTimeout(seasonRefreshTimer);
+    }
+
+    const now = new Date();
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const untilNextMonth = nextMonth.getTime() - now.getTime() + 1000;
+    seasonRefreshTimer = window.setTimeout(scheduleSeasonRefresh, Math.max(1000, untilNextMonth));
+  }
+
+  scheduleSeasonRefresh();
+  window.addEventListener('focus', scheduleSeasonRefresh);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) scheduleSeasonRefresh();
+  });
+
   const dialog = document.querySelector<HTMLDialogElement>('#landmark-dialog');
   const dialogTitle = document.querySelector<HTMLElement>('#dialog-title');
   const dialogCopy = document.querySelector<HTMLElement>('#dialog-copy');
@@ -111,6 +167,43 @@ import { siteUrl } from '../../lib/site-url';
   let activeLandmark = '';
   let frameVisit = 0;
   let offertoryFrameHeight = 680;
+  let haidenBackdropDataUrl: Promise<string> | null = null;
+
+  function getHaidenBackdropDataUrl() {
+    if (!haidenBackdropDataUrl) {
+      const frameUrl = new URL(haidenFrame?.getAttribute('src') ?? window.location.href, window.location.href);
+      const imageUrl = new URL('haiden-worship-view.png', frameUrl);
+      haidenBackdropDataUrl = fetch(imageUrl)
+        .then((response) => {
+          if (!response.ok) throw new Error(`拜殿底圖載入失敗：${response.status}`);
+          return response.blob();
+        })
+        .then((blob) => new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('無法讀取拜殿底圖'));
+          reader.onerror = () => reject(reader.error ?? new Error('無法讀取拜殿底圖'));
+          reader.readAsDataURL(blob);
+        }))
+        .catch((error) => {
+          haidenBackdropDataUrl = null;
+          console.error(error);
+          throw error;
+        });
+    }
+    return haidenBackdropDataUrl;
+  }
+
+  function sendHaidenBackdrop() {
+    if (activeLandmark !== 'haiden' || !haidenFrame?.contentWindow) return;
+    const targetWindow = haidenFrame.contentWindow;
+    getHaidenBackdropDataUrl().then((dataUrl) => {
+      if (activeLandmark === 'haiden' && targetWindow === haidenFrame?.contentWindow) {
+        targetWindow.postMessage({ type: 'shrine-haiden:backdrop', dataUrl }, '*');
+      }
+    }).catch(() => {});
+  }
+
+  haidenFrame?.addEventListener('load', sendHaidenBackdrop);
   const shrineIntroduction = '沿著參道走進綠園神社，在樹影與潮聲之間停下腳步，讓心情慢慢安定。';
   const landmarks: Record<string, { title: string; copy: string; note: string }> = {
     torii: { title: '鳥居', copy: '', note: '鳥居的朱紅柱與橫木，藏著一條通往出口的迷宮。' },
@@ -228,8 +321,10 @@ import { siteUrl } from '../../lib/site-url';
   .map-kicker { margin: 0; color: #c6aa73; font-size: .58rem; letter-spacing: .2em; }
   .map-caption h2 { margin: 0; color: #f1e4c9; font-size: 1.1rem; letter-spacing: .1em; }
   .map-hint { margin: 0; color: #bdc9c3; font-size: .75rem; }
-  .shrine-map { position: relative; isolation: isolate; height: clamp(34rem,70vw,45rem); overflow: hidden; background: linear-gradient(180deg,#123442 0%,#244c4c 12%,#3f634f 30%,#526d4b 75%,#3e5c43 100%); }
-  .shrine-map::before { content: ''; position: absolute; inset: 0; z-index: -1; opacity: .28; background-image: radial-gradient(#e0d5ad 0.6px,transparent .8px),radial-gradient(#0e242b 0.55px,transparent .8px); background-size: 17px 19px,23px 26px; background-position: 0 0,8px 11px; }
+  .shrine-map { position: relative; isolation: isolate; height: clamp(34rem,70vw,45rem); overflow: hidden; background-color: #315b45; background-image: var(--shrine-map-image); background-position: center; background-size: cover; background-repeat: no-repeat; }
+  .shrine-map::before { display: none; }
+  .shrine-map > .sea,.shrine-map > .shoreline,.shrine-map > .forest,.shrine-map > .approach-path,.shrine-map > .cross-path,.shrine-map > .garden,.shrine-map > .stone-lantern,.shrine-map > .map-grass { display: none; }
+  .shrine-map .torii-art,.shrine-map .pavilion-art,.shrine-map .shrine-building,.shrine-map .offertory-art,.shrine-map .omikuji-stand { display: none; }
   .sea { position: absolute; inset: 0 0 auto; height: 19%; overflow: hidden; background: linear-gradient(180deg,#143440,#22515a 78%,#456958); }
   .sea i { position: absolute; left: -8%; width: 116%; height: 3.6rem; border-top: 2px solid #c5d6c66b; border-radius: 50%; transform: rotate(-2deg); }
   .sea i:nth-child(1) { top: 34%; }
@@ -261,21 +356,23 @@ import { siteUrl } from '../../lib/site-url';
   .grass-one { left: 15%; top: 66%; }
   .grass-two { right: 17%; top: 36%; font-size: 1rem; }
   .grass-three { right: 23%; bottom: 4%; }
-  .map-place { position: absolute; z-index: 4; display: flex; flex-direction: column; align-items: center; gap: .15rem; padding: .25rem; color: #fcf3df; border: 0; border-radius: .6rem; background: #14282126; cursor: pointer; transition: transform .18s ease, background .18s ease, filter .18s ease; }
+  .map-place { position: absolute; z-index: 4; display: flex; flex-direction: column; align-items: center; gap: .15rem; padding: .25rem; color: #fcf3df; border: 0; border-radius: .6rem; background: transparent; cursor: pointer; transition: transform .18s ease, background .18s ease, filter .18s ease; }
   .map-place:hover,.map-place:focus-visible { z-index: 6; background: #10251ed9; transform: translateY(-4px) scale(1.04); filter: drop-shadow(0 5px 8px #07131aa0); }
   .place-label { padding: .1rem .42rem; color: #fff4de; border: 1px solid #dfc58c99; border-radius: 999px; background: #152c2bd9; font-size: .72rem; font-weight: 750; letter-spacing: .08em; white-space: nowrap; text-shadow: 0 1px 3px #000; }
-  .place-torii { top: auto; bottom: 3%; left: 50%; transform: translateX(-50%); }
+  .place-torii { top: 83%; left: 50%; transform: translateX(-50%); }
   .place-torii:hover,.place-torii:focus-visible { transform: translate(-50%,-4px) scale(1.04); }
   .torii-art { display: block; width: clamp(5rem,14vw,8.25rem); height: clamp(4.7rem,13vw,7.7rem); filter: drop-shadow(0 5px 6px #111b1c88); }
   .torii-art svg { width: 100%; height: 100%; overflow: visible; fill: #a8332c; stroke: #dfb965; stroke-width: 1.5; stroke-linejoin: round; }
-  .place-chōzuya { top: 43%; left: 12%; }
-  .place-office { top: 43%; right: 12%; }
-  .place-haiden { top: 10%; left: 50%; transform: translateX(-50%); }
+  .place-chōzuya { top: 44%; left: 20%; transform: translateX(-50%); }
+  .place-chōzuya:hover,.place-chōzuya:focus-visible { transform: translate(-50%,-4px) scale(1.04); }
+  .place-office { top: 44%; left: 80%; transform: translateX(-50%); }
+  .place-office:hover,.place-office:focus-visible { transform: translate(-50%,-4px) scale(1.04); }
+  .place-haiden { top: 18%; left: 50%; transform: translateX(-50%); }
   .place-haiden:hover,.place-haiden:focus-visible { transform: translate(-50%,-4px) scale(1.04); }
   .place-offertory { top: 34%; left: 50%; transform: translateX(-50%); }
   .place-offertory:hover,.place-offertory:focus-visible { transform: translate(-50%,-4px) scale(1.04); }
   .offertory-art { display: block; width: 5.5rem; height: 3.85rem; filter: drop-shadow(0 5px 6px #10251f99); }
-  .place-omikuji { left: 50%; top: 57%; transform: translateX(-50%); }
+  .place-omikuji { left: 50%; top: 48%; transform: translateX(-50%); }
   .place-omikuji:hover,.place-omikuji:focus-visible { transform: translate(-50%,-4px) scale(1.04); }
   .pavilion-art { position: relative; display: block; width: 6.5rem; height: 4.7rem; filter: drop-shadow(0 4px 5px #162a23a8); }
   .pavilion-art i { position: absolute; display: block; }
@@ -323,19 +420,10 @@ import { siteUrl } from '../../lib/site-url';
     .shrine-page { margin: -1rem -.5rem 0; padding-inline: .5rem; }
     .shrine-wrap { padding: .6rem .1rem 1rem; }
     .shrine-mast { padding-top: .7rem; }
-    .shrine-map { height: 35rem; }
+    .shrine-map { height: auto; min-height: 0; aspect-ratio: 3 / 2; background-size: 100% 100%; }
     .map-caption { align-items: start; flex-direction: column; gap: .15rem; padding: .7rem .8rem; }
     .map-hint { font-size: .68rem; }
-    .approach-path { width: 48%; }
-    .cross-path { left: 2%; right: 2%; }
-    .cross-path-two { left: 7%; right: 7%; }
-    .place-chōzuya { left: 3%; }
-    .place-office { right: 3%; }
-    .pavilion-art { transform: scale(.8); margin: -.35rem 0; }
-    .shrine-building { transform: scale(.82); margin: -.55rem 0; }
     .place-label { font-size: .62rem; }
-    .forest { width: 19%; }
-    .garden { width: 13%; }
     .shrine-footer { font-size: .61rem; }
     #haiden-frame.landmark-frame,#torii-frame.landmark-frame { height: min(60dvh,32rem); }
   }

@@ -25,6 +25,15 @@
     @media(max-width:380px){.answer-list{grid-template-columns:1fr}.answer{min-height:46px}.question-card h1{font-size:1.45rem}.wish-chip{font-size:.74rem}}
     .answer{text-align:center}.quiz-progress{margin-top:18px;color:#887453;font-size:.85rem;text-align:right}.wish-reset{position:absolute;z-index:20;top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));display:grid;place-items:center;width:48px;height:48px;padding:10px;color:#fff5dd;border:1px solid #f4d99d99;border-radius:50%;background:#7c3a32d9;box-shadow:0 3px 12px #07161455;cursor:pointer}.wish-reset[hidden]{display:none}.wish-reset svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.wish-reset:hover{background:#9b493b}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    /* Close view of the haiden from the worship position, just before the offertory box. */
+    .scene{background:#173b3d}
+    .scene:before{display:none}
+    .worship-backdrop{position:absolute;z-index:0;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 57%;transform:scale(1.09);transform-origin:center 56%;filter:saturate(.94) brightness(.9);transition:transform .72s ease,filter .72s ease}
+    .world>.sky-glow,.world>.garden,.world>.approach,.world>.rail,.world>.lantern,.world>.shrine{display:none!important}
+    .game.pose-bow .worship-backdrop{transform:translateY(1%) scale(1.12);filter:saturate(.94) brightness(.86)}
+    .game.camera-bow .world{transform-origin:50% 56%;animation:camera-nod .72s ease-in-out}
+    @keyframes camera-nod{0%,100%{transform:translateY(0) scale(1)}35%{transform:translateY(7px) scale(1.018)}70%{transform:translateY(2px) scale(1.006)}}
+    @media(max-width:640px){.worship-backdrop{object-position:50% 57%;transform:scale(1.2)}.game.pose-bow .worship-backdrop{transform:translateY(1%) scale(1.23)}}
   </style>
 </head>
 <body>
@@ -39,6 +48,7 @@
     </div>
     <div class="scene" id="scene" aria-label="參拜者站在拜殿前的第一人稱視角">
       <div class="world">
+        <img class="worship-backdrop" src="haiden-worship-view.png" alt="" aria-hidden="true">
         <div class="sky-glow"></div><div class="garden left"></div><div class="garden right"></div><div class="approach"></div><div class="rail"></div>
         <div class="lantern one"></div><div class="lantern two"></div>
         <div class="shrine" aria-hidden="true"><div class="shrine-roof"></div><div class="shrine-body"></div><div class="shrine-curtain"></div><div class="bell-rope"></div></div>
@@ -141,5 +151,20 @@
       window.addEventListener('pagehide',()=>{cancelAnimationFrame(animation);clearTimeout(prayerTimer);clearInterval(birdTimer);audio?.close()});
     })();
   </script>
+<script>
+  window.addEventListener('message', (event) => {
+    const message = event.data;
+    if (
+      event.source !== window.parent ||
+      !message ||
+      message.type !== 'shrine-haiden:backdrop' ||
+      typeof message.dataUrl !== 'string' ||
+      !message.dataUrl.startsWith('data:image/png;base64,')
+    ) return;
+
+    const backdrop = document.querySelector('.worship-backdrop');
+    if (backdrop instanceof HTMLImageElement) backdrop.src = message.dataUrl;
+  });
+</script>
 </body>
 </html>
