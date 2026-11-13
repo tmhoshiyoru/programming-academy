@@ -45,6 +45,7 @@ const { title, description = '課程與互動練習', hideShrineLink = false } =
   const pinnedKey = 'little-green-academy-sidebar-pinned';
   let pinned = localStorage.getItem(pinnedKey) === 'true';
   let manuallyOpen = false;
+  let sidebarIsOpen = pinned;
 
   function updateSidebar() {
     if (!layout || !sidebar || !pinButton || !handleButton) return;
@@ -85,47 +86,65 @@ const { title, description = '課程與互動練習', hideShrineLink = false } =
   }
 
   if (layout && sidebar && pinButton && handleButton) {
+    const syncSidebarOpenState = () => {
+      sidebarIsOpen = pinned || manuallyOpen || sidebar.matches(':hover') || sidebar.matches(':focus-within') || handleButton.matches(':hover') || handleButton.matches(':focus-visible');
+    };
+
     pinButton.addEventListener('click', () => {
+      const wasOpen = pinned || manuallyOpen;
       pinned = !pinned;
       manuallyOpen = false;
       localStorage.setItem(pinnedKey, String(pinned));
       sidebar.dataset.suppressHover = String(!pinned);
       updateSidebar();
-      if (pinned) scrollToCurrentChapter();
+      sidebarIsOpen = pinned;
+      if (!wasOpen && sidebarIsOpen) scrollToCurrentChapter();
     });
 
     handleButton.addEventListener('click', () => {
       if (pinned) return;
+      const wasOpen = sidebarIsOpen;
       manuallyOpen = !manuallyOpen;
       sidebar.dataset.suppressHover = String(!manuallyOpen);
       updateSidebar();
-      if (manuallyOpen) scrollToCurrentChapter();
+      sidebarIsOpen = pinned || manuallyOpen;
+      if (!wasOpen && sidebarIsOpen) scrollToCurrentChapter();
     });
 
     sidebar.addEventListener('pointerenter', () => {
-      if (!pinned) {
-        sidebar.dataset.suppressHover = 'false';
-        updateSidebar();
-        scrollToCurrentChapter();
-      }
+      if (pinned) return;
+      const wasOpen = sidebarIsOpen;
+      sidebar.dataset.suppressHover = 'false';
+      updateSidebar();
+      sidebarIsOpen = true;
+      if (!wasOpen) scrollToCurrentChapter();
     });
+
     sidebar.addEventListener('focusin', () => {
-      if (!pinned) {
-        sidebar.dataset.suppressHover = 'false';
-        updateSidebar();
-        scrollToCurrentChapter();
-      }
+      if (pinned) return;
+      const wasOpen = sidebarIsOpen;
+      sidebar.dataset.suppressHover = 'false';
+      updateSidebar();
+      sidebarIsOpen = true;
+      if (!wasOpen) scrollToCurrentChapter();
     });
+
     sidebar.addEventListener('pointerleave', () => {
-      if (!pinned) {
-        manuallyOpen = false;
-        sidebar.dataset.suppressHover = 'false';
-        updateSidebar();
-      }
+      if (pinned) return;
+      manuallyOpen = false;
+      sidebar.dataset.suppressHover = 'false';
+      updateSidebar();
+      syncSidebarOpenState();
+    });
+
+    sidebar.addEventListener('focusout', () => {
+      requestAnimationFrame(syncSidebarOpenState);
+    });
+    handleButton.addEventListener('focusout', () => {
+      requestAnimationFrame(syncSidebarOpenState);
     });
 
     updateSidebar();
-    if (pinned) scrollToCurrentChapter();
   }
 </script>
 
