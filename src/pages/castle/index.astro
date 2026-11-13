@@ -1,0 +1,153 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { siteUrl } from '../../lib/site-url';
+
+const landmarks = [
+  { name: '天守', x: 47, y: 10 },
+  { name: '櫓', x: 85, y: 43 },
+  { name: '本丸御殿', x: 25, y: 48 },
+  { name: '庭園', x: 52, y: 51.5 },
+  { name: '大手門', x: 39, y: 74.5 },
+  { name: '石垣', x: 62, y: 83 },
+  { name: '渡橋', x: 46, y: 84 },
+];
+---
+
+<SiteLayout title="綠園城" description="循著綠園神社的林間步道，來到護城河畔的綠園城。" hideShrineLink>
+  <div class="castle-page">
+    <h1>綠園城</h1>
+    <div class="castle-map">
+      <img
+        id="castle-map-image"
+        src={siteUrl('/castle/green-garden-castle-map.png')}
+        data-spring={siteUrl('/castle/green-garden-castle-map-spring.png')}
+        data-summer={siteUrl('/castle/green-garden-castle-map-summer.png')}
+        data-autumn={siteUrl('/castle/green-garden-castle-map-autumn.png')}
+        data-winter={siteUrl('/castle/green-garden-castle-map-winter.png')}
+        alt="綠園城全景。木橋跨過護城河，大手門兩側掛著三葉銀杏紋綠旗，御殿門口有綠暖簾，庭園池畔立著綠園石碑，後方是白牆天守。"
+        width="1536"
+        height="1024"
+      />
+      <ul class="castle-landmarks" aria-label="綠園城地標">
+        {landmarks.map(({ name, x, y }) => (
+          <li class:list={['castle-landmark', { 'bridge-landmark': name === '渡橋' }]} style={`--x: ${x}%; --y: ${y}%`}>{name}</li>
+        ))}
+      </ul>
+      <form class="shrine-return" action={siteUrl('/shrine/')} method="get">
+        <button type="submit">往綠園神社</button>
+      </form>
+    </div>
+  </div>
+</SiteLayout>
+
+<script>
+  const map = document.querySelector<HTMLImageElement>('#castle-map-image');
+  const taipeiMonth = new Intl.DateTimeFormat('en', { month: 'numeric', timeZone: 'Asia/Taipei' });
+  const seasons = ['winter', 'spring', 'summer', 'autumn'];
+
+  function updateSeasonalMap() {
+    if (!map) return;
+
+    const month = Number(taipeiMonth.format(new Date()));
+    const season = seasons[Math.floor((month % 12) / 3)];
+    const source = map.dataset[season];
+    if (source && map.getAttribute('src') !== source) map.src = source;
+  }
+
+  updateSeasonalMap();
+  window.addEventListener('pageshow', updateSeasonalMap);
+  window.addEventListener('focus', updateSeasonalMap);
+</script>
+
+<style>
+  .castle-page {
+    width: min(100% - 2rem, 72rem);
+    margin-inline: auto;
+    padding-block: clamp(1.25rem, 4vw, 3rem);
+  }
+
+  h1 {
+    margin: 0 0 1.25rem;
+    color: #193d2d;
+    font-family: 'Noto Serif TC', 'Songti TC', serif;
+    font-size: clamp(2rem, 6vw, 4rem);
+    letter-spacing: .14em;
+    text-align: center;
+  }
+
+  .castle-map {
+    position: relative;
+    container-type: inline-size;
+    overflow: hidden;
+    border: 1px solid #b69a68;
+    border-radius: .75rem;
+    background: #315b45;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .castle-landmarks {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .castle-landmark {
+    position: absolute;
+    top: var(--y);
+    left: var(--x);
+    transform: translate(-50%, -50%);
+    padding: .12em .55em;
+    border: 1px solid #e2c78b;
+    border-radius: 999px;
+    background: #192e26;
+    color: #fff4dc;
+    font-size: clamp(.55rem, 1.8cqw, .9rem);
+    font-weight: 700;
+    line-height: 1.35;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px #18231b80;
+  }
+
+  .shrine-return {
+    position: absolute;
+    bottom: 1%;
+    left: 30%;
+    margin: 0;
+    transform: translateX(-50%);
+  }
+
+  .shrine-return button {
+    min-height: clamp(30px, 8cqw, 44px);
+    padding: .25em .8em;
+    border: 2px solid #f2d79b;
+    border-radius: .5rem;
+    background: #005641;
+    color: #fff7e7;
+    font: inherit;
+    font-size: clamp(.72rem, 2vw, 1rem);
+    font-weight: 750;
+    white-space: nowrap;
+    box-shadow: 0 3px 10px #25150890;
+    cursor: pointer;
+  }
+
+  .shrine-return button:hover {
+    background: #086b52;
+  }
+
+  .shrine-return button:focus-visible {
+    outline: 2px solid #fff7e7;
+    outline-offset: 2px;
+  }
+
+  @container (max-width: 340px) {
+    .bridge-landmark { left: 49%; }
+    .shrine-return { left: 24%; }
+    .shrine-return button { font-size: .65rem; }
+  }
+</style>

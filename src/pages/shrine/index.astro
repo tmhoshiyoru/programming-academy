@@ -80,6 +80,7 @@ import { siteUrl } from '../../lib/site-url';
             <span class="place-label">御神籤</span>
           </button>
 
+          <a class="castle-path" href={siteUrl('/castle/')} aria-label="沿步道前往綠園城"></a>
           <span class="map-direction" aria-label="北方">北 <b>↑</b></span>
         </div>
         <p class="map-note" aria-live="polite" id="map-note">沿著參道走進綠園神社，在樹影與潮聲之間停下腳步，讓心情慢慢安定。</p>
@@ -321,7 +322,18 @@ import { siteUrl } from '../../lib/site-url';
   .map-kicker { margin: 0; color: #c6aa73; font-size: .58rem; letter-spacing: .2em; }
   .map-caption h2 { margin: 0; color: #f1e4c9; font-size: 1.1rem; letter-spacing: .1em; }
   .map-hint { margin: 0; color: #bdc9c3; font-size: .75rem; }
-  .shrine-map { position: relative; isolation: isolate; height: clamp(34rem,70vw,45rem); overflow: hidden; background-color: #315b45; background-image: var(--shrine-map-image); background-position: center; background-size: cover; background-repeat: no-repeat; }
+  .shrine-map { position: relative; isolation: isolate; container-type: size; height: clamp(34rem,70vw,45rem); overflow: hidden; background-color: #315b45; background-image: var(--shrine-map-image); background-position: center; background-size: cover; background-repeat: no-repeat; }
+  .castle-path {
+    position: absolute;
+    z-index: 5;
+    /* Match the path endpoint in the centered 3:2 background, including cover cropping. */
+    left: calc(50% - max(35.7cqw, 53.55cqh));
+    top: calc(50% - max(21.67cqw, 32.5cqh));
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+    -webkit-tap-highlight-color: transparent;
+  }
   .shrine-map::before { display: none; }
   .shrine-map > .sea,.shrine-map > .shoreline,.shrine-map > .forest,.shrine-map > .approach-path,.shrine-map > .cross-path,.shrine-map > .garden,.shrine-map > .stone-lantern,.shrine-map > .map-grass { display: none; }
   .shrine-map .torii-art,.shrine-map .pavilion-art,.shrine-map .shrine-building,.shrine-map .offertory-art,.shrine-map .omikuji-stand { display: none; }
@@ -416,7 +428,7 @@ import { siteUrl } from '../../lib/site-url';
   #chozuya-frame.landmark-frame { height: 24rem; min-height: 0; background: #153b42; }
   .landmark-frame[hidden] { display: none; }
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-  @media (max-width: 620px) {
+  @media (max-width: 800px) {
     .shrine-page { margin: -1rem -.5rem 0; padding-inline: .5rem; }
     .shrine-wrap { padding: .6rem .1rem 1rem; }
     .shrine-mast { padding-top: .7rem; }
