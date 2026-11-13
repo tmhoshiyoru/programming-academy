@@ -58,6 +58,32 @@ const { title, description = '課程與互動練習', hideShrineLink = false } =
     handleButton.textContent = pinned || manuallyOpen ? '‹' : '›';
   }
 
+  function scrollToCurrentChapter() {
+    if (!sidebar) return;
+    const nav = sidebar.querySelector<HTMLElement>('.tree-nav');
+    const activeLink = nav?.querySelector<HTMLElement>('a[aria-current="page"]');
+    const rootList = nav?.querySelector<HTMLElement>(':scope > ul');
+    if (!nav || !activeLink || !rootList) return;
+
+    let branch = activeLink.closest<HTMLElement>('li.tree-branch');
+    while (branch && branch.parentElement !== rootList) {
+      branch = branch.parentElement?.closest<HTMLElement>('li.tree-branch') ?? null;
+    }
+    if (!branch) return;
+
+    const chapterLink = branch.querySelector<HTMLElement>(':scope > details > summary > a.tree-chapter-link');
+    const target = chapterLink ?? branch;
+    requestAnimationFrame(() => {
+      const navRect = nav.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const top = nav.scrollTop + targetRect.top - navRect.top - Math.min(24, nav.clientHeight * 0.15);
+      nav.scrollTo({
+        top: Math.max(0, top),
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      });
+    });
+  }
+
   if (layout && sidebar && pinButton && handleButton) {
     pinButton.addEventListener('click', () => {
       pinned = !pinned;
@@ -65,6 +91,7 @@ const { title, description = '課程與互動練習', hideShrineLink = false } =
       localStorage.setItem(pinnedKey, String(pinned));
       sidebar.dataset.suppressHover = String(!pinned);
       updateSidebar();
+      if (pinned) scrollToCurrentChapter();
     });
 
     handleButton.addEventListener('click', () => {
@@ -72,12 +99,21 @@ const { title, description = '課程與互動練習', hideShrineLink = false } =
       manuallyOpen = !manuallyOpen;
       sidebar.dataset.suppressHover = String(!manuallyOpen);
       updateSidebar();
+      if (manuallyOpen) scrollToCurrentChapter();
     });
 
     sidebar.addEventListener('pointerenter', () => {
       if (!pinned) {
         sidebar.dataset.suppressHover = 'false';
         updateSidebar();
+        scrollToCurrentChapter();
+      }
+    });
+    sidebar.addEventListener('focusin', () => {
+      if (!pinned) {
+        sidebar.dataset.suppressHover = 'false';
+        updateSidebar();
+        scrollToCurrentChapter();
       }
     });
     sidebar.addEventListener('pointerleave', () => {
@@ -89,6 +125,7 @@ const { title, description = '課程與互動練習', hideShrineLink = false } =
     });
 
     updateSidebar();
+    if (pinned) scrollToCurrentChapter();
   }
 </script>
 
