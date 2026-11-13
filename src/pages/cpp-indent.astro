@@ -1,5 +1,6 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
+import ToolSidebar from '../components/ToolSidebar.astro';
 import { siteUrl } from '../lib/site-url';
 
 const example = `#include <iostream>
@@ -16,6 +17,9 @@ return 0;
 ---
 
 <SiteLayout title="C++ 自動縮排工具" description="檢查 C++ 程式語法，並使用四個空白整理縮排。">
+  <div class="page-grid">
+    <ToolSidebar />
+    <div class="course-column">
   <section class="article cpp-indent" data-worker={siteUrl('/cpp-compiler/check-worker.js')}>
     <p class="eyebrow">獨立工具</p>
     <h1>C++ 自動縮排工具</h1>
@@ -52,6 +56,8 @@ return 0;
       </details>
     </section>
   </section>
+    </div>
+  </div>
 </SiteLayout>
 
 <script>

@@ -51,10 +51,10 @@ const { title, description = '課程與互動練習', hideShrineLink = false } =
     layout.classList.toggle('sidebar-pinned', pinned);
     layout.classList.toggle('sidebar-manual-open', manuallyOpen && !pinned);
     pinButton.setAttribute('aria-pressed', String(pinned));
-    pinButton.setAttribute('aria-label', pinned ? '取消固定課程目錄' : '固定展開課程目錄');
+    pinButton.setAttribute('aria-label', pinned ? '取消固定側欄' : '固定展開側欄');
     pinButton.title = pinned ? '取消固定，回到滑出模式' : '固定展開並調整版面';
     handleButton.setAttribute('aria-expanded', String(pinned || manuallyOpen));
-    handleButton.setAttribute('aria-label', pinned || manuallyOpen ? '收合課程目錄' : '展開課程目錄');
+    handleButton.setAttribute('aria-label', pinned || manuallyOpen ? '收合網站導覽側欄' : '展開網站導覽側欄');
     handleButton.textContent = pinned || manuallyOpen ? '‹' : '›';
   }
 

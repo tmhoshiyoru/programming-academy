@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import SidebarTools from './SidebarTools.astro';
+import { courseFolderId, visibleCourses } from '../lib/visibility';
+import { siteUrl } from '../lib/site-url';
+
+const courses = visibleCourses(await getCollection('courseSettings'));
+---
+
+<aside class="course-nav" id="course-sidebar" aria-label="課程與小工具導覽">
+  <div class="sidebar-heading">
+    <p class="sidebar-tools-heading course-list-heading">網站課程</p>
+    <button class="sidebar-pin" id="sidebar-pin" type="button" aria-controls="course-sidebar" aria-pressed="false" aria-label="固定展開側欄" title="固定展開並調整版面">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17v5" /><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" /></svg>
+    </button>
+  </div>
+  <nav class="tree-nav" aria-label="網站課程清單">
+    {courses.length ? (
+      <ul>
+        {courses.map((course) => {
+          const courseId = courseFolderId(course.id);
+          return <li><a href={siteUrl(`/courses/${courseId}/`)}>{course.data.title}</a></li>;
+        })}
+      </ul>
+    ) : <p class="sidebar-empty">目前沒有公開課程。</p>}
+  </nav>
+  <SidebarTools />
+</aside>
+<button class="sidebar-handle" id="sidebar-handle" type="button" aria-controls="course-sidebar" aria-expanded="false" aria-label="展開網站導覽側欄">›</button>
+
+<style>
+  .course-list-heading { margin: 0; padding: .25rem .5rem; color: #3a5044; font-size: .95rem; font-weight: 800; }
+</style>

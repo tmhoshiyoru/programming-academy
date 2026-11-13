@@ -1,5 +1,6 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
+import ToolSidebar from '../components/ToolSidebar.astro';
 import { siteUrl } from '../lib/site-url';
 
 const example = `#include <iostream>
@@ -12,6 +13,9 @@ int main() {
 ---
 
 <SiteLayout title="C++ Debug 工具" description="在瀏覽器裡檢查 C++ 程式，查看錯誤位置與繁中提示。">
+  <div class="page-grid">
+    <ToolSidebar />
+    <div class="course-column">
   <section class="article cpp-debug" data-worker={siteUrl('/cpp-compiler/check-worker.js')}>
     <p class="eyebrow">獨立工具</p>
     <h1>C++ Debug 工具</h1>
@@ -40,6 +44,8 @@ int main() {
       </details>
     </section>
   </section>
+    </div>
+  </div>
 </SiteLayout>
 
 <script>

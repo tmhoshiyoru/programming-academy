@@ -1,8 +1,12 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
+import ToolSidebar from '../components/ToolSidebar.astro';
 ---
 
 <SiteLayout title="網頁模擬器" description="在本機頁面中編輯 HTML、CSS 和 JavaScript，並預覽結果。">
+  <div class="page-grid">
+    <ToolSidebar />
+    <div class="course-column">
   <section class="article simulator-shell">
     <p class="eyebrow">獨立工具</p>
     <h1>網頁模擬器</h1>
@@ -50,6 +54,8 @@ import SiteLayout from '../layouts/SiteLayout.astro';
       <iframe id="simulator-frame" class="simulator-frame" title="網頁程式碼預覽" sandbox="allow-scripts"></iframe>
     </section>
   </section>
+    </div>
+  </div>
 </SiteLayout>
 
 <script>
