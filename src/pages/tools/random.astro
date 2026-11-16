@@ -26,8 +26,9 @@ import { siteUrl } from '../../lib/site-url';
         <label>每組位數<input id="pw-length" type="number" min="4" max="128" value="6" inputmode="numeric"></label>
       </div>
       <div class="recipe-row">
-        <div class="recipe-label"><span class="recipe-dot">A</span><div><strong>英文字母</strong><small>大小寫混搭</small></div><span class="on-tag">包含</span></div>
-        <div class="recipe-label"><span class="recipe-dot gold">#</span><div><strong>數字</strong><small>避開容易看錯的字元</small></div><span class="on-tag">包含</span></div>
+        <label class="recipe-toggle"><input id="pw-uppercase" type="checkbox" checked><span class="toggle-ui"></span><span><strong>大寫字母</strong><small>ABC</small></span></label>
+        <label class="recipe-toggle"><input id="pw-lowercase" type="checkbox" checked><span class="toggle-ui"></span><span><strong>小寫字母</strong><small>abc</small></span></label>
+        <label class="recipe-toggle"><input id="pw-numbers" type="checkbox" checked><span class="toggle-ui"></span><span><strong>數字</strong><small>避開 0、1</small></span></label>
         <label class="recipe-toggle"><input id="pw-symbols" type="checkbox"><span class="toggle-ui"></span><span><strong>特殊符號</strong><small>加一點調味</small></span></label>
       </div>
       <p class="hint">已避開 O、0、1、I、l 等常見混淆字元。</p>
@@ -68,7 +69,8 @@ import { siteUrl } from '../../lib/site-url';
     document.querySelector('#draw-view')?.toggleAttribute('hidden', button.dataset.view !== 'draw');
   });
 
-  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  const uppercase = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const lowercase = 'abcdefghijkmnopqrstuvwxyz';
   const numbers = '23456789';
   const symbols = '!@#$%^&*()-_=+[]{};:,.?';
   function randomIndex(max: number) {
@@ -87,17 +89,46 @@ import { siteUrl } from '../../lib/site-url';
     const count = Number(pwCount.value), length = Number(pwLength.value);
     pwResults.replaceChildren();
     if (!Number.isInteger(count) || count < 1 || count > 50 || !Number.isInteger(length) || length < 4 || length > 128) { pwStatus.textContent = '請設定 1–50 組、每組 4–128 位。'; return; }
-    const useSymbols = document.querySelector<HTMLInputElement>('#pw-symbols')!.checked;
-    const pool = letters + numbers + (useSymbols ? symbols : '');
+    const selectedPools = [
+      document.querySelector<HTMLInputElement>('#pw-uppercase')!.checked ? [...uppercase] : [],
+      document.querySelector<HTMLInputElement>('#pw-lowercase')!.checked ? [...lowercase] : [],
+      document.querySelector<HTMLInputElement>('#pw-numbers')!.checked ? [...numbers] : [],
+      document.querySelector<HTMLInputElement>('#pw-symbols')!.checked ? [...symbols] : [],
+    ].filter((characters) => characters.length > 0);
+    if (!selectedPools.length) { pwStatus.textContent = '至少開啟一種字元類型。'; return; }
+    if (selectedPools.length > length) { pwStatus.textContent = `目前開啟了 ${selectedPools.length} 種字元類型，密碼長度至少要 ${selectedPools.length} 位。`; return; }
+    const pool = selectedPools.flat();
     for (let i = 0; i < count; i++) {
-      const chars = [pick([...letters.match(/[A-Z]/g)!]), pick([...letters.match(/[a-z]/g)!]), pick([...numbers])];
-      if (useSymbols) chars.push(pick([...symbols]));
+      const chars = selectedPools.map((characters) => pick(characters));
       while (chars.length < length) chars.push(pick([...pool]));
       const code = document.createElement('code'); code.textContent = shuffle(chars).join('');
       const item = document.createElement('div'); item.className = 'password-result';
-      const index = document.createElement('span'); index.textContent = String(i + 1).padStart(2, '0'); item.append(index, code); pwResults.append(item);
+      const serial = String(i + 1).padStart(2, '0');
+      const index = document.createElement('span'); index.textContent = serial;
+      const copyButton = document.createElement('button'); copyButton.type = 'button'; copyButton.className = 'copy-password';
+      copyButton.setAttribute('aria-label', `複製第 ${serial} 組密碼`);
+      const copyIcon = document.createElement('span'); copyIcon.className = 'copy-icon'; copyIcon.setAttribute('aria-hidden', 'true'); copyIcon.textContent = '⧉';
+      copyButton.append(code, copyIcon);
+      copyButton.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(code.textContent ?? '');
+          copyIcon.textContent = '✓';
+          copyButton.classList.add('is-copied');
+          copyButton.setAttribute('aria-label', `第 ${serial} 組密碼已複製`);
+          pwStatus.textContent = `第 ${serial} 組密碼已複製。`;
+          window.setTimeout(() => {
+            if (!copyButton.isConnected) return;
+            copyIcon.textContent = '⧉';
+            copyButton.classList.remove('is-copied');
+            copyButton.setAttribute('aria-label', `複製第 ${serial} 組密碼`);
+          }, 1600);
+        } catch {
+          pwStatus.textContent = '複製失敗，請手動選取密碼。';
+        }
+      });
+      item.append(index, copyButton); pwResults.append(item);
     }
-    pwStatus.textContent = `${count} 組密碼已完成。點選密碼即可選取。`;
+    pwStatus.textContent = `${count} 組密碼已完成。點選各組密碼即可複製。`;
   });
 
   const modeButtons = [...document.querySelectorAll<HTMLButtonElement>('.mode')];
@@ -164,13 +195,22 @@ import { siteUrl } from '../../lib/site-url';
   .eyebrow { color:var(--violet); font-size:.65rem; }.badge { white-space:nowrap; padding:.45rem .7rem; color:#e3dfff; background:#2a2445; border:1px solid #514777; border-radius:99px; font-size:.78rem; }.badge.coral { color:#ffd0c8; background:#3b242b; border-color:#70414a; }
   .controls { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }.controls label,.count-label { display:grid; gap:.4rem; color:#d9dcee; font-size:.9rem; font-weight:700; }
   input[type=number],textarea { width:100%; color:#f8f5ff; background:#0e1324; border:1px solid #383f5c; border-radius:.7rem; font:inherit; outline:none; }.controls input,.count-label input { padding:.7rem .8rem; }.controls input:focus,textarea:focus,.count-label input:focus { border-color:var(--violet); box-shadow:0 0 0 3px #9a82ff22; }
-  .recipe-row { display:grid; grid-template-columns:1fr 1fr 1.1fr; gap:.6rem; margin-top:1.1rem; }.recipe-label,.recipe-toggle { display:flex; align-items:center; gap:.65rem; min-height:4rem; padding:.7rem; background:#20253a; border:1px solid #363c55; border-radius:.7rem; }.recipe-dot { display:grid; place-items:center; width:1.8rem; height:1.8rem; flex:0 0 auto; color:#ded7ff; background:#51467d; border-radius:.55rem; font-weight:800; }.recipe-dot.gold { color:#ffe7ae; background:#6d5631; }.recipe-label div,.recipe-toggle > span:last-child { display:grid; line-height:1.3; }.recipe-label strong,.recipe-toggle strong { font-size:.83rem; }.recipe-label small,.recipe-toggle small { color:#9ca2b9; font-size:.68rem; }.on-tag { margin-left:auto; color:#91e0bc; font-size:.65rem; }.recipe-toggle { cursor:pointer; }.recipe-toggle input { position:absolute; width:1px; height:1px; opacity:0; }.toggle-ui { position:relative; width:2rem; height:1.15rem; flex:0 0 auto; background:#444b62; border-radius:99px; transition:.2s; }.toggle-ui::after { content:''; position:absolute; left:.15rem; top:.15rem; width:.85rem; height:.85rem; background:#e8e9f2; border-radius:50%; transition:.2s; }.recipe-toggle input:checked + .toggle-ui { background:#7261bf; }.recipe-toggle input:checked + .toggle-ui::after { transform:translateX(.85rem); }.recipe-toggle input:focus-visible + .toggle-ui { outline:3px solid #f4c86a; outline-offset:3px; }
+  .recipe-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.6rem; margin-top:1.1rem; }.recipe-toggle { display:flex; align-items:center; gap:.6rem; min-height:4rem; padding:.7rem; background:#20253a; border:1px solid #363c55; border-radius:.7rem; cursor:pointer; transition:background .2s,border-color .2s; }.recipe-toggle:has(input:checked) { background:#282440; border-color:#67578c; }.recipe-toggle > span:last-child { display:grid; line-height:1.3; }.recipe-toggle strong { font-size:.8rem; }.recipe-toggle small { color:#9ca2b9; font-size:.68rem; }.recipe-toggle input { position:absolute; width:1px; height:1px; opacity:0; }.toggle-ui { position:relative; width:2rem; height:1.15rem; flex:0 0 auto; background:#444b62; border-radius:99px; transition:.2s; }.toggle-ui::after { content:''; position:absolute; left:.15rem; top:.15rem; width:.85rem; height:.85rem; background:#e8e9f2; border-radius:50%; transition:.2s; }.recipe-toggle input:checked + .toggle-ui { background:#7261bf; }.recipe-toggle input:checked + .toggle-ui::after { transform:translateX(.85rem); }.recipe-toggle input:focus-visible + .toggle-ui { outline:3px solid #f4c86a; outline-offset:3px; }
   .hint { margin:.7rem 0; color:#999fb6; font-size:.8rem; }.primary-button { display:flex; align-items:center; justify-content:center; gap:.65rem; width:100%; margin-top:.8rem; padding:.85rem 1rem; color:#171427; background:linear-gradient(100deg,#c1aaff,#f3d27d); border:0; border-radius:.7rem; box-shadow:0 7px 22px #ad90ff22; font:inherit; font-weight:900; cursor:pointer; transition:transform .18s,filter .18s; }.primary-button:hover { transform:translateY(-2px); filter:brightness(1.08); }.primary-button:active { transform:translateY(0); }.primary-button > span:first-child { color:#6742a8; }.button-arrow { margin-left:auto; }
-  .feedback { min-height:1.5em; margin:.55rem 0; color:#a5abc2; text-align:center; font-size:.8rem; }.result-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.5rem; }.password-result { display:flex; align-items:center; gap:.7rem; padding:.6rem .75rem; color:#f3f0ff; background:#0e1324; border:1px solid #2d344e; border-radius:.6rem; }.password-result > span { color:#8372c9; font-size:.68rem; }.password-result code { overflow-wrap:anywhere; color:#dcd4ff; font-size:.88rem; cursor:text; user-select:all; }
+  .feedback { min-height:1.5em; margin:.55rem 0; color:#a5abc2; text-align:center; font-size:.8rem; }.result-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.5rem; }
+  :global(.password-result) { display:grid; grid-template-columns:2.6rem minmax(0,1fr); align-items:center; gap:1rem; padding:.6rem .75rem; color:#f3f0ff; background:#0e1324; border:1px solid #2d344e; border-radius:.6rem; }
+  :global(.password-result > span) { display:grid; place-items:center; min-height:1.5rem; padding-right:.8rem; color:#a99ce9; border-right:1px solid #45415f; font-size:.72rem; font-variant-numeric:tabular-nums; }
+  :global(.copy-password) { display:flex; align-items:center; justify-content:space-between; gap:.65rem; width:100%; min-width:0; padding:.2rem .15rem; color:#f3f0ff; background:transparent; border:0; border-radius:.35rem; text-align:left; cursor:pointer; transition:background .15s; }
+  :global(.copy-password:hover) { background:#1a2035; }
+  :global(.copy-password:hover code) { color:#fff; }
+  :global(.copy-password:focus-visible) { outline:2px solid #f4c86a; outline-offset:3px; }
+  :global(.copy-password code) { overflow-wrap:anywhere; color:#dcd4ff; font-size:.88rem; user-select:all; transition:color .15s; }
+  :global(.copy-icon) { display:grid; place-items:center; flex:0 0 auto; width:1.6rem; height:1.6rem; color:#a99ce9; background:#282440; border:1px solid #4c456f; border-radius:.45rem; font-size:1rem; line-height:1; transition:color .15s,background .15s; }
+  :global(.copy-password.is-copied .copy-icon) { color:#baf0d2; background:#1e3a34; border-color:#3e725e; }
   .draw-modes { display:flex; gap:.3rem; margin:-.2rem 0 1.2rem; padding:.3rem; width:fit-content; background:#0d1222; border:1px solid #2c334d; border-radius:.65rem; }.mode { padding:.5rem .8rem; color:#a5abc2; border:0; border-radius:.45rem; background:transparent; font:inherit; font-size:.84rem; cursor:pointer; }.mode.active { color:#fff; background:#39304f; box-shadow:inset 0 0 0 1px #67578c; }
   .field-label { display:grid; gap:.4rem; color:#e2e3f1; font-size:.95rem; font-weight:800; }.field-label span { color:#9fa5bd; font-size:.75rem; font-weight:400; }.draw-pane textarea { margin-top:.2rem; padding:.8rem; resize:vertical; line-height:1.55; }.count-label { display:flex; align-items:center; gap:.8rem; margin-top:1rem; }.count-label input { width:6rem; }.two-fields { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }.two-fields textarea { min-height:8rem; }.draw-button { color:#29151d; background:linear-gradient(100deg,#ffb093,#ffd773); }.draw-button > span:first-child { color:#a94746; }.draw-results { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.65rem; margin-top:1rem; }.ticket { display:flex; align-items:center; gap:.8rem; min-height:4.25rem; padding:.85rem 1rem; color:#fff0e8; background:linear-gradient(110deg,#3b2937,#28263b); border:1px solid #684754; border-radius:.7rem; opacity:0; transform:translateY(10px) scale(.98); transition:opacity .3s,transform .35s cubic-bezier(.2,.8,.2,1); }.ticket.revealed { opacity:1; transform:none; }.ticket span { display:grid; place-items:center; width:1.8rem; height:1.8rem; flex:0 0 auto; color:#ffd67a; background:#58404a; border-radius:50%; font-size:.72rem; }.ticket strong { font-size:1rem; white-space:pre-wrap; }
   .luck-app footer { padding:1.4rem .5rem 0; color:#767d96; text-align:center; font-size:.75rem; }
   [hidden] { display:none !important; }
-  @media(max-width:650px) { .luck-app { margin:-1rem auto; padding-inline:.1rem; }.hero { padding-block:2rem 1.4rem; }.hero h1 { font-size:2.7rem; }.sparkle { left:5%; }.orbit-a { right:6%; }.recipe-row { grid-template-columns:1fr 1fr; }.recipe-toggle { grid-column:1/-1; }.two-fields { grid-template-columns:1fr; }.two-fields textarea { min-height:6rem; }.section-heading { flex-direction:column; }.badge { order:-1; }.switcher { padding:.75rem .35rem; font-size:.9rem; } }
+  @media(max-width:650px) { .luck-app { margin:-1rem auto; padding-inline:.1rem; }.hero { padding-block:2rem 1.4rem; }.hero h1 { font-size:2.7rem; }.sparkle { left:5%; }.orbit-a { right:6%; }.recipe-row { grid-template-columns:repeat(2,minmax(0,1fr)); }.two-fields { grid-template-columns:1fr; }.two-fields textarea { min-height:6rem; }.section-heading { flex-direction:column; }.badge { order:-1; }.switcher { padding:.75rem .35rem; font-size:.9rem; } }
   @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition-duration:.01ms!important; } }
 </style>
