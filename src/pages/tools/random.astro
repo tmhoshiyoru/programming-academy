@@ -1,0 +1,176 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { siteUrl } from '../../lib/site-url';
+---
+
+<SiteLayout title="幸運補給站" description="把隨機交給一點好運：產生安全隨機密碼，或抽出名單與職務安排。">
+  <div class="luck-app">
+    <div class="topline"><a href={siteUrl('/tools/')}>← 所有小工具</a><span>LUCKY LAB · NO. 01</span></div>
+    <header class="hero">
+      <div class="sparkle" aria-hidden="true">✳</div>
+      <p class="kicker">今日好運，正在裝填</p>
+      <h1>幸運補給站<span>✦</span></h1>
+      <p class="intro">有些答案，交給一點隨機就好。</p>
+      <div class="orbit orbit-a" aria-hidden="true">✦</div><div class="orbit orbit-b" aria-hidden="true">✷</div>
+    </header>
+
+    <nav class="tool-switch" aria-label="選擇小工具">
+      <button type="button" class="switcher active" data-view="password" aria-pressed="true"><span>01</span> 密碼調製所</button>
+      <button type="button" class="switcher" data-view="draw" aria-pressed="false"><span>02</span> 命運抽抽樂</button>
+    </nav>
+
+    <section class="workbench" id="password-view" aria-labelledby="password-title">
+      <div class="section-heading"><div><p class="eyebrow">PASSWORD MIXER</p><h2 id="password-title">密碼調製所</h2><p>調好配方，讓隨機替你開鎖。</p></div><span class="badge">🔐 私密製作</span></div>
+      <div class="controls password-controls">
+        <label>產生組數<input id="pw-count" type="number" min="1" max="50" value="5" inputmode="numeric"></label>
+        <label>每組位數<input id="pw-length" type="number" min="4" max="128" value="6" inputmode="numeric"></label>
+      </div>
+      <div class="recipe-row">
+        <div class="recipe-label"><span class="recipe-dot">A</span><div><strong>英文字母</strong><small>大小寫混搭</small></div><span class="on-tag">包含</span></div>
+        <div class="recipe-label"><span class="recipe-dot gold">#</span><div><strong>數字</strong><small>避開容易看錯的字元</small></div><span class="on-tag">包含</span></div>
+        <label class="recipe-toggle"><input id="pw-symbols" type="checkbox"><span class="toggle-ui"></span><span><strong>特殊符號</strong><small>加一點調味</small></span></label>
+      </div>
+      <p class="hint">已避開 O、0、1、I、l 等常見混淆字元。</p>
+      <button class="primary-button" id="make-passwords" type="button"><span>✦</span> 開始調製 <span class="button-arrow">↗</span></button>
+      <p class="feedback" id="pw-status" role="status" aria-live="polite">最多 50 組，每組 4–128 位。</p>
+      <div id="pw-results" class="result-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="workbench" id="draw-view" aria-labelledby="draw-title" hidden>
+      <div class="section-heading"><div><p class="eyebrow">THE LUCKY DRAW</p><h2 id="draw-title">命運抽抽樂</h2><p>放進籤筒，讓今天的答案自己浮上來。</p></div><span class="badge coral">🎟 不重複抽出</span></div>
+      <div class="draw-modes" role="tablist" aria-label="抽籤玩法">
+        <button type="button" class="mode active" data-mode="free" role="tab" aria-selected="true">自由抽籤</button>
+        <button type="button" class="mode" data-mode="assign" role="tab" aria-selected="false">安排任務</button>
+      </div>
+      <div class="draw-pane" id="free-pane">
+        <label class="field-label" for="draw-items">籤筒裡有什麼？<span>用逗號、空白或換行分隔</span></label>
+        <textarea id="draw-items" rows="5" placeholder="例如：珍珠奶茶，週五免值日，神秘小禮物&#10;也可以每行輸入一個選項"></textarea>
+        <label class="count-label">這次想抽幾個？<input id="draw-count" type="number" min="1" max="100" value="1" inputmode="numeric"></label>
+      </div>
+      <div class="draw-pane" id="assign-pane" hidden>
+        <div class="two-fields"><label class="field-label" for="people-list">參加者<span>貼上姓名，逗號或換行分隔</span><textarea id="people-list" rows="5" placeholder="例如：小青、小宇、小安"></textarea></label>
+          <label class="field-label" for="draw-what">抽什麼<span>每行一個項目，依序配給抽中者</span><textarea id="draw-what" rows="5" placeholder="例如：主持人&#10;攝影師&#10;時間管理員"></textarea></label></div>
+        <p class="hint">抽出的每位參加者都會配到一個不同項目；項目數就是抽出人數。</p>
+      </div>
+      <button class="primary-button draw-button" id="draw-now" type="button"><span>✦</span> 開始抽籤 <span class="button-arrow">↗</span></button>
+      <p class="feedback" id="draw-status" role="status" aria-live="polite">每個選項最多抽出一次。</p>
+      <div class="draw-results" id="draw-results" aria-live="polite"></div>
+    </section>
+    <footer>你的資料只在這個頁面暫時使用，不會儲存。</footer>
+  </div>
+</SiteLayout>
+
+<script>
+  const switches = [...document.querySelectorAll<HTMLButtonElement>('.switcher')];
+  for (const button of switches) button.addEventListener('click', () => {
+    for (const item of switches) { const selected = item === button; item.classList.toggle('active', selected); item.setAttribute('aria-pressed', String(selected)); }
+    document.querySelector('#password-view')?.toggleAttribute('hidden', button.dataset.view !== 'password');
+    document.querySelector('#draw-view')?.toggleAttribute('hidden', button.dataset.view !== 'draw');
+  });
+
+  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  const numbers = '23456789';
+  const symbols = '!@#$%^&*()-_=+[]{};:,.?';
+  function randomIndex(max: number) {
+    const limit = Math.floor(256 / max) * max;
+    const byte = new Uint8Array(1);
+    do { crypto.getRandomValues(byte); } while (byte[0] >= limit);
+    return byte[0] % max;
+  }
+  function pick<T>(list: T[]): T { return list[randomIndex(list.length)]; }
+  function shuffle<T>(list: T[]): T[] { for (let i = list.length - 1; i > 0; i--) { const j = randomIndex(i + 1); [list[i], list[j]] = [list[j], list[i]]; } return list; }
+  const pwCount = document.querySelector<HTMLInputElement>('#pw-count')!;
+  const pwLength = document.querySelector<HTMLInputElement>('#pw-length')!;
+  const pwStatus = document.querySelector<HTMLElement>('#pw-status')!;
+  const pwResults = document.querySelector<HTMLElement>('#pw-results')!;
+  document.querySelector<HTMLButtonElement>('#make-passwords')!.addEventListener('click', () => {
+    const count = Number(pwCount.value), length = Number(pwLength.value);
+    pwResults.replaceChildren();
+    if (!Number.isInteger(count) || count < 1 || count > 50 || !Number.isInteger(length) || length < 4 || length > 128) { pwStatus.textContent = '請設定 1–50 組、每組 4–128 位。'; return; }
+    const useSymbols = document.querySelector<HTMLInputElement>('#pw-symbols')!.checked;
+    const pool = letters + numbers + (useSymbols ? symbols : '');
+    for (let i = 0; i < count; i++) {
+      const chars = [pick([...letters.match(/[A-Z]/g)!]), pick([...letters.match(/[a-z]/g)!]), pick([...numbers])];
+      if (useSymbols) chars.push(pick([...symbols]));
+      while (chars.length < length) chars.push(pick([...pool]));
+      const code = document.createElement('code'); code.textContent = shuffle(chars).join('');
+      const item = document.createElement('div'); item.className = 'password-result';
+      const index = document.createElement('span'); index.textContent = String(i + 1).padStart(2, '0'); item.append(index, code); pwResults.append(item);
+    }
+    pwStatus.textContent = `${count} 組密碼已完成。點選密碼即可選取。`;
+  });
+
+  const modeButtons = [...document.querySelectorAll<HTMLButtonElement>('.mode')];
+  let drawMode = 'free';
+  for (const button of modeButtons) button.addEventListener('click', () => {
+    drawMode = button.dataset.mode ?? 'free';
+    for (const item of modeButtons) { const selected = item === button; item.classList.toggle('active', selected); item.setAttribute('aria-selected', String(selected)); }
+    document.querySelector('#free-pane')?.toggleAttribute('hidden', drawMode !== 'free');
+    document.querySelector('#assign-pane')?.toggleAttribute('hidden', drawMode !== 'assign');
+    document.querySelector('#draw-results')?.replaceChildren();
+  });
+  const tokenize = (value: string) => value.split(/[\s,，、;；]+/u).map(item => item.trim()).filter(Boolean);
+  const drawStatus = document.querySelector<HTMLElement>('#draw-status')!;
+  const drawResults = document.querySelector<HTMLElement>('#draw-results')!;
+  document.querySelector<HTMLButtonElement>('#draw-now')!.addEventListener('click', () => {
+    let entries: string[], labels: string[] | null = null;
+    if (drawMode === 'free') {
+      entries = tokenize(document.querySelector<HTMLTextAreaElement>('#draw-items')!.value);
+      const count = Number(document.querySelector<HTMLInputElement>('#draw-count')!.value);
+      if (!entries.length) { drawStatus.textContent = '先在籤筒裡放入一些選項吧。'; return; }
+      if (!Number.isInteger(count) || count < 1 || count > entries.length) { drawStatus.textContent = `抽出數量請設為 1–${entries.length}。`; return; }
+      entries = shuffle(entries).slice(0, count);
+    } else {
+      const people = tokenize(document.querySelector<HTMLTextAreaElement>('#people-list')!.value);
+      labels = tokenize(document.querySelector<HTMLTextAreaElement>('#draw-what')!.value);
+      if (!people.length || !labels.length) { drawStatus.textContent = '參加者和「抽什麼」都要先填好。'; return; }
+      if (labels.length > people.length) { drawStatus.textContent = `參加者至少要有 ${labels.length} 位，才能讓每個項目都抽到不同的人。`; return; }
+      const selectedPeople = shuffle(people).slice(0, labels.length);
+      entries = labels.map((label, index) => `${label}　·　${selectedPeople[index]}`);
+    }
+    drawResults.replaceChildren();
+    entries.forEach((entry, index) => {
+      const ticket = document.createElement('div'); ticket.className = 'ticket';
+      const serial = document.createElement('span'); serial.textContent = String(index + 1).padStart(2, '0');
+      const name = document.createElement('strong'); name.textContent = entry;
+      ticket.append(serial, name); drawResults.append(ticket);
+      requestAnimationFrame(() => ticket.classList.add('revealed'));
+    });
+    drawStatus.textContent = drawMode === 'free' ? `籤筒有 ${tokenize(document.querySelector<HTMLTextAreaElement>('#draw-items')!.value).length} 個選項，已抽出 ${entries.length} 個。` : `已為 ${entries.length} 個項目安排人選。`;
+  });
+</script>
+
+<style>
+  :global(body) { background: #090c1b; }
+  :global(.site-header) { background: #101426; border-color: #252b43; }
+  :global(.brand), :global(.site-header nav a) { color: #f5f1e9; }
+  :global(.site-header nav a:hover) { background: #232943; }
+  :global(.site-footer) { color: #a5abc2; background: #101426; border-color: #252b43; }
+  .luck-app { --ink: #f5f1e9; --muted: #a6acc3; --line: #343a56; --violet: #9a82ff; --gold: #f4c86a; --coral: #ff8c7a; max-width: 980px; margin: -2.25rem auto; padding: 1.2rem 1rem 3rem; color: var(--ink); }
+  .topline { display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:.78rem; letter-spacing:.12em; }
+  .topline a { color:#c8c1ff; text-decoration:none; font-size:.9rem; letter-spacing:0; }
+  .hero { position:relative; overflow:hidden; text-align:center; padding:2.6rem 1rem 2rem; }
+  .kicker,.eyebrow { margin:0; color:var(--gold); font-size:.72rem; font-weight:800; letter-spacing:.22em; }
+  .hero h1 { margin:.3rem 0 0; color:var(--ink); font-size:clamp(2.4rem,7vw,4.8rem); line-height:1.1; letter-spacing:-.06em; }
+  .hero h1 span { display:inline-block; padding-left:.25em; color:var(--gold); font-size:.48em; vertical-align:top; }
+  .intro { margin:.65rem 0 0; color:var(--muted); }
+  .sparkle { position:absolute; top:1.1rem; left:17%; color:var(--violet); font-size:2rem; opacity:.8; }
+  .orbit { position:absolute; color:#625a99; }.orbit-a { right:17%; top:1.3rem; }.orbit-b { left:22%; bottom:1.1rem; color:var(--coral); }
+  .tool-switch { display:grid; grid-template-columns:1fr 1fr; gap:.55rem; padding:.45rem; background:#14192c; border:1px solid #272d47; border-radius:1rem; }
+  .switcher { padding:.9rem; color:#aeb4ca; border:1px solid transparent; border-radius:.7rem; background:transparent; font:inherit; font-weight:800; cursor:pointer; transition:.2s ease; }
+  .switcher span { margin-right:.5rem; color:#777e9a; font-size:.75rem; }.switcher.active { color:#fff; background:linear-gradient(110deg,#302950,#282542); border-color:#534778; box-shadow:0 6px 20px #0003; }.switcher.active span { color:var(--gold); }
+  .workbench { margin-top:1rem; padding:clamp(1.2rem,4vw,2.2rem); background:linear-gradient(145deg,#171c31,#121729); border:1px solid #303650; border-radius:1.15rem; box-shadow:0 25px 60px #0004; }
+  .section-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; margin-bottom:1.5rem; }.section-heading h2 { margin:.25rem 0; color:#fff; font-size:1.75rem; }.section-heading p:last-child { margin:.2rem 0; color:var(--muted); font-size:.95rem; }
+  .eyebrow { color:var(--violet); font-size:.65rem; }.badge { white-space:nowrap; padding:.45rem .7rem; color:#e3dfff; background:#2a2445; border:1px solid #514777; border-radius:99px; font-size:.78rem; }.badge.coral { color:#ffd0c8; background:#3b242b; border-color:#70414a; }
+  .controls { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }.controls label,.count-label { display:grid; gap:.4rem; color:#d9dcee; font-size:.9rem; font-weight:700; }
+  input[type=number],textarea { width:100%; color:#f8f5ff; background:#0e1324; border:1px solid #383f5c; border-radius:.7rem; font:inherit; outline:none; }.controls input,.count-label input { padding:.7rem .8rem; }.controls input:focus,textarea:focus,.count-label input:focus { border-color:var(--violet); box-shadow:0 0 0 3px #9a82ff22; }
+  .recipe-row { display:grid; grid-template-columns:1fr 1fr 1.1fr; gap:.6rem; margin-top:1.1rem; }.recipe-label,.recipe-toggle { display:flex; align-items:center; gap:.65rem; min-height:4rem; padding:.7rem; background:#20253a; border:1px solid #363c55; border-radius:.7rem; }.recipe-dot { display:grid; place-items:center; width:1.8rem; height:1.8rem; flex:0 0 auto; color:#ded7ff; background:#51467d; border-radius:.55rem; font-weight:800; }.recipe-dot.gold { color:#ffe7ae; background:#6d5631; }.recipe-label div,.recipe-toggle > span:last-child { display:grid; line-height:1.3; }.recipe-label strong,.recipe-toggle strong { font-size:.83rem; }.recipe-label small,.recipe-toggle small { color:#9ca2b9; font-size:.68rem; }.on-tag { margin-left:auto; color:#91e0bc; font-size:.65rem; }.recipe-toggle { cursor:pointer; }.recipe-toggle input { position:absolute; width:1px; height:1px; opacity:0; }.toggle-ui { position:relative; width:2rem; height:1.15rem; flex:0 0 auto; background:#444b62; border-radius:99px; transition:.2s; }.toggle-ui::after { content:''; position:absolute; left:.15rem; top:.15rem; width:.85rem; height:.85rem; background:#e8e9f2; border-radius:50%; transition:.2s; }.recipe-toggle input:checked + .toggle-ui { background:#7261bf; }.recipe-toggle input:checked + .toggle-ui::after { transform:translateX(.85rem); }.recipe-toggle input:focus-visible + .toggle-ui { outline:3px solid #f4c86a; outline-offset:3px; }
+  .hint { margin:.7rem 0; color:#999fb6; font-size:.8rem; }.primary-button { display:flex; align-items:center; justify-content:center; gap:.65rem; width:100%; margin-top:.8rem; padding:.85rem 1rem; color:#171427; background:linear-gradient(100deg,#c1aaff,#f3d27d); border:0; border-radius:.7rem; box-shadow:0 7px 22px #ad90ff22; font:inherit; font-weight:900; cursor:pointer; transition:transform .18s,filter .18s; }.primary-button:hover { transform:translateY(-2px); filter:brightness(1.08); }.primary-button:active { transform:translateY(0); }.primary-button > span:first-child { color:#6742a8; }.button-arrow { margin-left:auto; }
+  .feedback { min-height:1.5em; margin:.55rem 0; color:#a5abc2; text-align:center; font-size:.8rem; }.result-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.5rem; }.password-result { display:flex; align-items:center; gap:.7rem; padding:.6rem .75rem; color:#f3f0ff; background:#0e1324; border:1px solid #2d344e; border-radius:.6rem; }.password-result > span { color:#8372c9; font-size:.68rem; }.password-result code { overflow-wrap:anywhere; color:#dcd4ff; font-size:.88rem; cursor:text; user-select:all; }
+  .draw-modes { display:flex; gap:.3rem; margin:-.2rem 0 1.2rem; padding:.3rem; width:fit-content; background:#0d1222; border:1px solid #2c334d; border-radius:.65rem; }.mode { padding:.5rem .8rem; color:#a5abc2; border:0; border-radius:.45rem; background:transparent; font:inherit; font-size:.84rem; cursor:pointer; }.mode.active { color:#fff; background:#39304f; box-shadow:inset 0 0 0 1px #67578c; }
+  .field-label { display:grid; gap:.4rem; color:#e2e3f1; font-size:.95rem; font-weight:800; }.field-label span { color:#9fa5bd; font-size:.75rem; font-weight:400; }.draw-pane textarea { margin-top:.2rem; padding:.8rem; resize:vertical; line-height:1.55; }.count-label { display:flex; align-items:center; gap:.8rem; margin-top:1rem; }.count-label input { width:6rem; }.two-fields { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }.two-fields textarea { min-height:8rem; }.draw-button { color:#29151d; background:linear-gradient(100deg,#ffb093,#ffd773); }.draw-button > span:first-child { color:#a94746; }.draw-results { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.65rem; margin-top:1rem; }.ticket { display:flex; align-items:center; gap:.8rem; min-height:4.25rem; padding:.85rem 1rem; color:#fff0e8; background:linear-gradient(110deg,#3b2937,#28263b); border:1px solid #684754; border-radius:.7rem; opacity:0; transform:translateY(10px) scale(.98); transition:opacity .3s,transform .35s cubic-bezier(.2,.8,.2,1); }.ticket.revealed { opacity:1; transform:none; }.ticket span { display:grid; place-items:center; width:1.8rem; height:1.8rem; flex:0 0 auto; color:#ffd67a; background:#58404a; border-radius:50%; font-size:.72rem; }.ticket strong { font-size:1rem; white-space:pre-wrap; }
+  .luck-app footer { padding:1.4rem .5rem 0; color:#767d96; text-align:center; font-size:.75rem; }
+  [hidden] { display:none !important; }
+  @media(max-width:650px) { .luck-app { margin:-1rem auto; padding-inline:.1rem; }.hero { padding-block:2rem 1.4rem; }.hero h1 { font-size:2.7rem; }.sparkle { left:5%; }.orbit-a { right:6%; }.recipe-row { grid-template-columns:1fr 1fr; }.recipe-toggle { grid-column:1/-1; }.two-fields { grid-template-columns:1fr; }.two-fields textarea { min-height:6rem; }.section-heading { flex-direction:column; }.badge { order:-1; }.switcher { padding:.75rem .35rem; font-size:.9rem; } }
+  @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition-duration:.01ms!important; } }
+</style>
