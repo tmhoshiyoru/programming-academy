@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 610" role="img" aria-labelledby="title desc">
+  <title id="title">桌面溼度提醒器接線示意圖</title>
+  <desc id="desc">ESP32-S3 接 DHT11、LCD1602 I2C、紅色 LED 與 330 歐姆電阻、4乘3矩陣鍵盤。需要電源的模組共地。</desc>
+  <defs>
+    <style>
+      text{font-family:system-ui,"Noto Sans TC",sans-serif;fill:#18352d}.title{font-size:24px;font-weight:700}.label{font-size:18px;font-weight:700}.small{font-size:16px}.pin{font-size:17px;font-weight:600}.wire{fill:none;stroke:#2677b7;stroke-width:4;stroke-linecap:round}.box{fill:#fff;stroke:#92b5a3;stroke-width:2}.board{fill:#173d35;stroke:#0f2923;stroke-width:3}.white{fill:#fff}.pinmark{fill:#e8cb76;stroke:#6e5a23;stroke-width:1}.note{fill:#fff7e8;stroke:#e0b565;stroke-width:2}
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2677b7"/></marker>
+  </defs>
+  <rect width="900" height="610" rx="18" fill="#f4f8f5"/>
+  <text x="34" y="43" class="title">桌面溼度提醒器｜接線示意</text>
+  <text x="34" y="70" class="small">藍線表示 GPIO 訊號；供電請依各模組規格接妥，所有模組共地。</text>
+  <rect x="45" y="105" width="220" height="382" rx="16" class="board"/>
+  <text x="155" y="143" text-anchor="middle" class="label white">ESP32-S3 N16R8</text>
+  <text x="70" y="176" class="small white">GPIO 輸出／輸入腳位</text>
+  <g class="pinmark"><circle cx="265" cy="222" r="7"/><circle cx="265" cy="294" r="7"/><circle cx="265" cy="366" r="7"/><circle cx="265" cy="438" r="7"/></g>
+  <text x="235" y="228" text-anchor="end" class="pin white">GPIO 10</text>
+  <text x="235" y="300" text-anchor="end" class="pin white">GPIO 8、9</text>
+  <text x="235" y="372" text-anchor="end" class="pin white">GPIO 19</text>
+  <text x="235" y="444" text-anchor="end" class="pin white">GPIO 4–7、15–17</text>
+  <path d="M272 222H330" class="wire" marker-end="url(#arrow)"/>
+  <path d="M272 294H330" class="wire" marker-end="url(#arrow)"/>
+  <path d="M272 366H330" class="wire" marker-end="url(#arrow)"/>
+  <path d="M272 438H330" class="wire" marker-end="url(#arrow)"/>
+  <rect x="345" y="186" width="515" height="72" rx="12" class="box"/>
+  <text x="367" y="215" class="label">DHT11 溫溼度模組</text><text x="367" y="241" class="small">DATA → GPIO 10　　VCC → 3V3　　GND → 共地</text>
+  <rect x="345" y="270" width="515" height="72" rx="12" class="box"/>
+  <text x="367" y="299" class="label">LCD1602 I2C</text><text x="367" y="325" class="small">SDA → GPIO 8　　SCL → GPIO 9　　電源／電位轉換依模組規格</text>
+  <rect x="345" y="354" width="515" height="72" rx="12" class="box"/>
+  <text x="367" y="383" class="label">紅色 LED</text><text x="367" y="409" class="small">GPIO 19 → 330 Ω 電阻 → LED 正極；LED 負極 → GND</text>
+  <rect x="345" y="438" width="515" height="72" rx="12" class="box"/>
+  <text x="367" y="467" class="label">4 × 3 矩陣鍵盤</text><text x="367" y="493" class="small">R1–R4 → GPIO 4–7　　C1–C3 → GPIO 15–17</text>
+  <rect x="45" y="525" width="815" height="58" rx="11" class="note"/>
+  <text x="67" y="551" class="small">LED 正極串聯 330 Ω 限流電阻；需供電模組的 GND 都接回 ESP32-S3 GND。</text>
+  <text x="67" y="574" class="small">本圖為接線示意；報告還要附上實際完成的電路照片並標註關鍵組件。</text>
+</svg>

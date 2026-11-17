@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1090" role="img" aria-labelledby="title desc">
+  <title id="title">桌面溼度提醒器系統流程圖</title>
+  <desc id="desc">Mermaid 流程圖示例：每兩秒取樣並檢查讀值；錯誤時顯示錯誤和熄燈；有效時更新畫面、判斷門檻，並每十秒上傳 GAS。</desc>
+  <defs>
+    <style>
+      text{font-family:system-ui,"Noto Sans TC",sans-serif;fill:#18352d}.title{font-size:24px;font-weight:700}.label{font-size:18px;font-weight:650}.small{font-size:15px}.node{fill:#eff8f2;stroke:#398168;stroke-width:2}.action{fill:#fff;stroke:#628b78;stroke-width:2}.decision{fill:#fff4d9;stroke:#c5902c;stroke-width:2}.error{fill:#fff0ed;stroke:#bd5d50;stroke-width:2}.gas{fill:#eaf2ff;stroke:#4877b5;stroke-width:2}.line{fill:none;stroke:#416b59;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.yes{fill:#26734e;font-weight:700}.no{fill:#a84138;font-weight:700}
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#416b59"/></marker>
+  </defs>
+  <rect width="900" height="1090" rx="18" fill="#f7faf8"/>
+  <text x="35" y="43" class="title">桌面溼度提醒器｜系統流程（Mermaid 範例）</text>
+  <rect x="330" y="76" width="240" height="58" rx="29" class="node"/><text x="450" y="112" text-anchor="middle" class="label">開始／持續執行 loop()</text>
+  <path d="M450 134V160" class="line" marker-end="url(#arrow)"/>
+  <rect x="300" y="170" width="300" height="72" rx="12" class="action"/><text x="450" y="199" text-anchor="middle" class="label">每 2 秒讀取 DHT11</text><text x="450" y="225" text-anchor="middle" class="small">溫度與相對溼度</text>
+  <path d="M450 242V270" class="line" marker-end="url(#arrow)"/>
+  <path d="M450 273L575 323L450 373L325 323Z" class="decision"/><text x="450" y="319" text-anchor="middle" class="label">讀值有效？</text><text x="450" y="343" text-anchor="middle" class="small">不是 NaN 且在合理範圍</text>
+  <path d="M325 323H170V394" class="line" marker-end="url(#arrow)"/><text x="240" y="311" class="no">否</text>
+  <rect x="40" y="405" width="260" height="100" rx="12" class="error"/><text x="170" y="438" text-anchor="middle" class="label">LCD 顯示 ERROR</text><text x="170" y="467" text-anchor="middle" class="small">紅燈熄滅，不送出這筆資料</text><text x="170" y="490" text-anchor="middle" class="small">等待下一輪取樣</text>
+  <path d="M575 323H740V394" class="line" marker-end="url(#arrow)"/><text x="650" y="311" class="yes">是</text>
+  <rect x="600" y="405" width="280" height="92" rx="12" class="action"/><text x="740" y="438" text-anchor="middle" class="label">更新 LCD 與紅燈</text><text x="740" y="469" text-anchor="middle" class="small">alertOn = 溼度 ≥ 目前門檻</text>
+  <path d="M740 497V528" class="line" marker-end="url(#arrow)"/>
+  <rect x="600" y="538" width="280" height="78" rx="12" class="action"/><text x="740" y="569" text-anchor="middle" class="label">掃描矩陣鍵盤</text><text x="740" y="595" text-anchor="middle" class="small">按下 # 才套用新門檻</text>
+  <path d="M740 616V647" class="line" marker-end="url(#arrow)"/>
+  <path d="M740 650L855 700L740 750L625 700Z" class="decision"/><text x="740" y="696" text-anchor="middle" class="label">已到 10 秒上傳時間？</text><text x="740" y="720" text-anchor="middle" class="small">有效讀值才進入上傳</text>
+  <path d="M855 700H890V1029H570" class="line" marker-end="url(#arrow)"/><text x="886" y="688" text-anchor="end" class="no">否</text>
+  <path d="M740 750V777" class="line" marker-end="url(#arrow)"/><text x="756" y="770" class="yes">是</text>
+  <rect x="600" y="787" width="280" height="82" rx="12" class="gas"/><text x="740" y="818" text-anchor="middle" class="label">HTTPS POST 至 GAS /exec</text><text x="740" y="846" text-anchor="middle" class="small">傳送讀值、門檻與警示狀態</text>
+  <path d="M740 869V889" class="line" marker-end="url(#arrow)"/>
+  <rect x="600" y="899" width="280" height="70" rx="12" class="gas"/><text x="740" y="928" text-anchor="middle" class="label">GAS doPost 驗證並寫入表格</text><text x="740" y="953" text-anchor="middle" class="small">回覆 OK 或 ERROR</text>
+  <path d="M600 934H450V1000" class="line" marker-end="url(#arrow)"/>
+  <path d="M170 505V1029H330" class="line" marker-end="url(#arrow)" stroke-dasharray="8 7"/>
+  <rect x="330" y="1000" width="240" height="58" rx="12" class="node"/><text x="450" y="1036" text-anchor="middle" class="label">進入下一輪取樣</text>
+  <text x="35" y="1078" class="small">錯誤分支會略過上傳；正常流程每 10 秒送出一筆有效資料。</text>
+</svg>
