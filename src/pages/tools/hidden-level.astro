@@ -1,0 +1,143 @@
+---
+import type { MarkdownInstance } from 'astro';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { siteUrl } from '../../lib/site-url';
+
+const problems = Object.entries(import.meta.glob<MarkdownInstance<{ title: string }>>(
+  '../../content/hidden-level/*.md',
+  { eager: true },
+)).sort(([left], [right]) => left.localeCompare(right));
+const pageTitle = '你想要的答案都在這裡';
+---
+
+<SiteLayout title={pageTitle} noindex>
+  <article class="article" id="hidden-level" data-return-url={siteUrl('/tools/random/')} hidden>
+    <h1>{pageTitle}</h1>
+    <div class="exam-tabs" role="tablist" aria-label="上機考題目">
+      {problems.map((_, index) => (
+        <button type="button" role="tab" id={`tab-${index + 1}`}
+          aria-controls={`problem-${index + 1}`} aria-selected={index === 0}
+          tabindex={index === 0 ? 0 : -1}>第 {index + 1} 題</button>
+      ))}
+    </div>
+    {problems.map(([, { Content, frontmatter }], index) => (
+      <section class="exam-problem" id={`problem-${index + 1}`} role="tabpanel"
+        aria-labelledby={`tab-${index + 1}`} tabindex="0" hidden={index !== 0}>
+        <h2>{frontmatter.title}</h2>
+        <Content />
+      </section>
+    ))}
+  </article>
+</SiteLayout>
+
+<script>
+  import '../../scripts/code-blocks';
+
+  const level = document.querySelector<HTMLElement>('#hidden-level')!;
+  if (sessionStorage.getItem('lucky-lab-hidden-level') === 'unlocked') {
+    sessionStorage.removeItem('lucky-lab-hidden-level');
+    const tabs = [...level.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panels = [...level.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
+
+    function selectTab(selected: number) {
+      tabs.forEach((tab, index) => {
+        const active = index === selected;
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active ? 0 : -1;
+        panels[index].hidden = !active;
+      });
+    }
+
+    function selectFromHash() {
+      const index = panels.findIndex((panel) => `#${panel.id}` === window.location.hash);
+      selectTab(Math.max(0, index));
+    }
+
+    function activateTab(index: number) {
+      selectTab(index);
+      history.replaceState(history.state, '', `#${panels[index].id}`);
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => activateTab(index));
+      tab.addEventListener('keydown', (event) => {
+        let next: number;
+        switch (event.key) {
+          case 'ArrowLeft': next = (index - 1 + tabs.length) % tabs.length; break;
+          case 'ArrowRight': next = (index + 1) % tabs.length; break;
+          case 'Home': next = 0; break;
+          case 'End': next = tabs.length - 1; break;
+          default: return;
+        }
+        event.preventDefault();
+        activateTab(next);
+        tabs[next].focus();
+      });
+    });
+    window.addEventListener('hashchange', selectFromHash);
+    selectFromHash();
+    level.hidden = false;
+  } else {
+    window.location.replace(level.dataset.returnUrl!);
+  }
+</script>
+
+<style>
+  .exam-tabs {
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    padding: 0.25rem 0.25rem 0;
+    border-bottom: 1px solid #b8cabd;
+  }
+
+  .exam-tabs button {
+    flex: 0 0 auto;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid #b8cabd;
+    border-bottom: 0;
+    border-radius: 0.65rem 0.65rem 0 0;
+    background: #edf3ee;
+    color: #234938;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .exam-tabs button[aria-selected="true"] {
+    background: #235442;
+    border-color: #235442;
+    color: white;
+  }
+
+  .exam-tabs button:focus-visible {
+    outline: 2px solid #235442;
+    outline-offset: 2px;
+  }
+
+  .exam-problem {
+    margin-top: 1.5rem;
+  }
+
+  .exam-problem :global(pre) {
+    position: relative;
+    padding-top: 3rem;
+  }
+
+  .exam-problem :global(.copy-code-button) {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.6rem;
+    min-height: 1.8rem;
+    padding: 0.25rem 0.65rem;
+    color: #173d2d;
+    background: #f4f7f3;
+    border: 1px solid #a8bbad;
+    border-radius: 0.4rem;
+    font: 700 0.82rem / 1.3 system-ui, sans-serif;
+    cursor: pointer;
+  }
+
+  .exam-problem :global(.copy-code-button:hover) {
+    background: #e3eee4;
+  }
+</style>

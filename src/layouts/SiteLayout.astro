@@ -6,9 +6,10 @@ interface Props {
   title: string;
   description?: string;
   hideShrineLink?: boolean;
+  noindex?: boolean;
 }
 
-const { title, description = '課程與互動練習', hideShrineLink = false } = Astro.props;
+const { title, description = '課程與互動練習', hideShrineLink = false, noindex = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -17,6 +18,7 @@ const { title, description = '課程與互動練習', hideShrineLink = false } =
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="icon" type="image/png" href={siteUrl('/favicon.png')} />
     <title>{title}｜小綠綠程式學苑</title>
   </head>

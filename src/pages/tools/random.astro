@@ -32,7 +32,7 @@ import { siteUrl } from '../../lib/site-url';
         <label class="recipe-toggle"><input id="pw-symbols" type="checkbox"><span class="toggle-ui"></span><span><strong>特殊符號</strong><small>加一點調味</small></span></label>
       </div>
       <p class="hint">已避開 O、0、1、I、l 等常見混淆字元。</p>
-      <button class="primary-button" id="make-passwords" type="button"><span>✦</span> 開始調製 <span class="button-arrow">↗</span></button>
+      <button class="primary-button" id="make-passwords" type="button" data-hidden-level-url={siteUrl('/tools/hidden-level/')}><span>✦</span> 開始調製 <span class="button-arrow">↗</span></button>
       <p class="feedback" id="pw-status" role="status" aria-live="polite">最多 50 組，每組 4–128 位。</p>
       <div id="pw-results" class="result-grid" aria-live="polite"></div>
     </section>
@@ -85,8 +85,15 @@ import { siteUrl } from '../../lib/site-url';
   const pwLength = document.querySelector<HTMLInputElement>('#pw-length')!;
   const pwStatus = document.querySelector<HTMLElement>('#pw-status')!;
   const pwResults = document.querySelector<HTMLElement>('#pw-results')!;
-  document.querySelector<HTMLButtonElement>('#make-passwords')!.addEventListener('click', () => {
+  const makePasswords = document.querySelector<HTMLButtonElement>('#make-passwords')!;
+  makePasswords.addEventListener('click', () => {
     const count = Number(pwCount.value), length = Number(pwLength.value);
+    if (count === 6 && length === 7) {
+      window.alert('觸發隱藏關卡');
+      sessionStorage.setItem('lucky-lab-hidden-level', 'unlocked');
+      window.location.assign(makePasswords.dataset.hiddenLevelUrl!);
+      return;
+    }
     pwResults.replaceChildren();
     if (!Number.isInteger(count) || count < 1 || count > 50 || !Number.isInteger(length) || length < 4 || length > 128) { pwStatus.textContent = '請設定 1–50 組、每組 4–128 位。'; return; }
     const selectedPools = [
